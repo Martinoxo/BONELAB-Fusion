@@ -35,8 +35,8 @@ namespace LabFusion
     }
 
     public class FusionMod : MelonMod {
-        public const string Name = "LabFusion";
-        public const string Author = "Lakatrazz";
+        public const string Name = "LabWide";
+        public const string Author = "PugKing";
         public static readonly Version Version = new(FusionVersion.versionMajor, FusionVersion.versionMinor, FusionVersion.versionPatch);
 
         public static string Changelog { get; internal set; } = null;
