@@ -19,8 +19,9 @@ This mod is networked and built around Steam and Riptide, a P2P networking layer
 2. Setup a "managed" folder in the "Core" folder.
 3. Drag the dlls from Melonloader/Managed into the managed folder.
 4. Drag MelonLoader.dll and 0Harmony.dll into the managed folder.
-5. You're done!
+5. Place the RiptideNetworking.dll and netstandard.dll into the managed folder.
+6. You're done!
 
 ## Disclaimer
 
-#### THIS PROJECT IS NOT AFFILIATED WITH ANY OTHER MULTIPLAYER MODS OR STRESS LEVEL ZERO! This is its own standalone mod and shares no code with others, any similarities are coincidental!
+#### THIS PROJECT IS NOT AFFILIATED WITH SLZ, LAKATRAZZ, OR ANY OTHER MULTIPLAYER MOD DEVELOPMENT TEAMS.
