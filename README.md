@@ -1,6 +1,8 @@
-# BONELAB TideFusion Release
-A multiplayer mod for BONELAB featuring support for all platforms.
+# BONELAB TideFusion Rewrite
+A fork of BONELAB Fusion, utilizing P2P networking in order to support Quest users without a PC.
 [You can view a basic installation guide here.](INSTALLATION.md)
+
+#### THIS IS A REWRITE OF THE ORIGIONAL TIDEFUSION PROJECT, NOT ALL THINGS ARE PRESENT IN THIS REPOSITORY
 
 ## Networking
 This mod is networked and built around Steam and Riptide, a P2P networking layer for Quest users without a PC and LAN players.
