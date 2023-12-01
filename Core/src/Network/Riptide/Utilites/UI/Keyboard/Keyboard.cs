@@ -16,7 +16,7 @@ namespace LabFusion.Network.Riptide.Utilities
 {
     public class Keyboard
     {
-        public static List<Keyboard> Keyboards;
+        public static List<Keyboard> Keyboards = new List<Keyboard>();
 
         public Action<string> OnEnter;
         public MenuCategory Category;
@@ -31,68 +31,89 @@ namespace LabFusion.Network.Riptide.Utilities
                 keyboard.Category = keyboardCategory;
             else
             {
-                FusionLogger.Error($"Failed to create keyboard category for {name}");
+                FusionLogger.Error($"Failed to create keyboard category for keyboard {name}");
             }
 
             keyboard.OnEnter = onEnter;
 
             GameObject keyboardObject = GameObject.Instantiate(FusionContentLoader.KeyboardPrefab);
-            var canvas = keyboardObject.transform.FindChild("Canvas");
+            keyboardObject.SetActive(true);
+            if (keyboardObject == null )
+            {
+                FusionLogger.Error($"Keyboard is null for keyboard {name}!");
+                return;
+            }
+            var canvas = keyboardObject.transform.Find("Keyboard").Find("Canvas");
             if (canvas == null)
             {
-                FusionLogger.Error("Canvas is null!");
+                FusionLogger.Error($"Canvas is null for keyboard {name}!");
                 return;
             }
 
             var keyboardCanvas = canvas.gameObject.AddComponent<KeyboardCanvas>();
             keyboardCanvas.Keyboard = keyboard;
             keyboardCanvas.SetupReferences();
+            keyboard.KeyboardObject = keyboardObject;
 
             Keyboards.Add(keyboard);
+            keyboardObject.SetActive(false);
         }
 
-        [HarmonyPatch(typeof(UIManager), "OnCategoryUpdated")]
+        [HarmonyPatch(typeof(UIManager), nameof(UIManager.OnCategoryUpdated))]
         public class CategoryUpdatePatch
         {
             public static void Postfix(UIManager __instance, MenuCategory category)
             {
-                bool isKeyboardMenu = false;
-                Keyboard keyboard = null;
                 foreach (var obj in Keyboards)
                 {
                     if (obj.Category == category)
                     {
-                        isKeyboardMenu = true;
-                        keyboard = obj;
-                    }
-                }
-                if (isKeyboardMenu)
-                {
-                    __instance.MainPage.transform.Find("ScrollDown").gameObject.SetActive(false);
-                    __instance.MainPage.transform.Find("ScrollUp").gameObject.SetActive(false);
-                    __instance.MainPage.transform.Find("Return").gameObject.SetActive(false);
+                        var keyboard = obj;
+                        __instance.MainPage.transform.Find("ScrollDown").gameObject.SetActive(false);
+                        __instance.MainPage.transform.Find("ScrollUp").gameObject.SetActive(false);
+                        __instance.MainPage.transform.Find("Return").gameObject.SetActive(false);
 
-                    if (keyboard.KeyboardObject == null)
-                    {
-                        FusionLogger.Error("Keyboard Object is null!");
+                        if (keyboard.KeyboardObject == null)
+                        {
+                            keyboard.KeyboardObject = GameObject.Instantiate(FusionContentLoader.KeyboardPrefab);
+                            keyboard.KeyboardObject.SetActive(true);
+                            if (keyboard.KeyboardObject == null)
+                            {
+                                FusionLogger.Error($"Keyboard is null!");
+                                return;
+                            }
+                            var canvas = keyboard.KeyboardObject.transform.Find("Keyboard").Find("Canvas");
+                            if (canvas == null)
+                            {
+                                FusionLogger.Error($"Canvas is null!");
+                                return;
+                            }
+
+                            var keyboardCanvas = canvas.gameObject.AddComponent<KeyboardCanvas>();
+                            keyboardCanvas.Keyboard = keyboard;
+                            keyboardCanvas.SetupReferences();
+
+                            keyboard.KeyboardObject.transform.parent = __instance.MainPage.transform;
+                            keyboard.KeyboardObject.transform.localPosition = Vector3.forward;
+                            keyboard.KeyboardObject.transform.localRotation = Quaternion.identity;
+                            keyboard.KeyboardObject.transform.localScale = new Vector3 (180, 180, 180);
+                        }
+                        else
+                        {
+                            keyboard.KeyboardObject.SetActive(true);
+                        }
+
+                        break;
                     }
                     else
                     {
-                        keyboard.KeyboardObject.transform.parent = __instance.MainPage.transform;
-                        keyboard.KeyboardObject.transform.localPosition = Vector3.forward;
-                        keyboard.KeyboardObject.transform.localRotation = Quaternion.identity;
-                        keyboard.KeyboardObject.transform.localScale = Vector3.one;
-                        keyboard.KeyboardObject.SetActive(true);
-                    }
-                }
-                else if (category == MenuManager.RootCategory)
-                {
-                    __instance.MainPage.transform.Find("ScrollDown").gameObject.SetActive(true);
-                    __instance.MainPage.transform.Find("ScrollUp").gameObject.SetActive(true);
-                    __instance.MainPage.transform.Find("Return").gameObject.SetActive(true);
-                    foreach (var obj in Keyboards)
-                    {
-                        obj.KeyboardObject.SetActive(false);
+                        foreach (var keyboard in Keyboards)
+                        {
+                            if (category == keyboard.Category.Parent || category == MenuManager.RootCategory)
+                            {
+                                keyboard.KeyboardObject.SetActive(false);
+                            }
+                        }
                     }
                 }
             }

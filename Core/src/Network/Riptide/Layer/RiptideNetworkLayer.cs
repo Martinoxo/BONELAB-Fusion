@@ -9,6 +9,7 @@ using BoneLib.BoneMenu.Elements;
 using LabFusion.BoneMenu;
 using UnityEngine;
 using BoneLib;
+using LabFusion.Utilities;
 
 namespace LabFusion.Network.Riptide
 {
@@ -46,7 +47,20 @@ namespace LabFusion.Network.Riptide
         {
             // Create the basic options
             CreateMatchmakingMenu(category);
-            Keyboard.CreateKeyboard(category, "Test Keyboard", null);
+            Keyboard.CreateKeyboard(category, "Test Keyboard", (text) =>
+            {
+                FusionNotification keyboardTest = new FusionNotification()
+                {
+                    title = "Keyboard Test",
+                    showTitleOnPopup = true,
+                    message = $"Keyboard Text: {text}",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 2f,
+                };
+
+                FusionNotifier.Send(keyboardTest);
+            });
             BoneMenuCreator.CreateGamemodesMenu(category);
             BoneMenuCreator.CreateSettingsMenu(category);
             BoneMenuCreator.CreateNotificationsMenu(category);

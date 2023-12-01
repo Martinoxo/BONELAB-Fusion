@@ -440,6 +440,8 @@ namespace LabFusion.Representation
                 repNameText.text += " <size=60%>Q";
             }
             repNameText.font = PersistentAssetCreator.Font;
+
+            UIMachineUtilities.OverrideFonts(repCanvas.transform);
         }
 
         public float GetNametagOffset()
