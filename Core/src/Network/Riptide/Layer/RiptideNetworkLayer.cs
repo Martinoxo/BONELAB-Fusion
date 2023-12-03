@@ -10,17 +10,21 @@ using LabFusion.BoneMenu;
 using UnityEngine;
 using BoneLib;
 using LabFusion.Utilities;
+using static LabFusion.Network.Riptide.ServerManagement;
+using static LabFusion.Network.Riptide.ClientManagement;
+using MelonLoader;
+using LabFusion.Network.Riptide.BoneMenu;
 
 namespace LabFusion.Network.Riptide
 {
     public class RiptideNetworkLayer : NetworkLayer
     {
-        public ServerTypes CurrentServerType = ServerTypes.None;
-        private Server CurrentServer = new();
-        private Client CurrentClient = new();
+        public static readonly string TideFusionPath = $"{MelonUtils.UserDataDirectory}/TideFusion";
 
-        internal override bool IsClient => CurrentClient.IsConnected;
-        internal override bool IsServer => CurrentServer.IsRunning;
+        public ServerTypes CurrentServerType = ServerTypes.None;
+
+        internal override bool IsClient => _currentClient.IsConnected;
+        internal override bool IsServer => _currentServer.IsRunning;
 
         internal override string Title => "Riptide";
 
@@ -28,14 +32,10 @@ namespace LabFusion.Network.Riptide
 
         internal override bool CheckValidation() => true;
 
-        internal override void OnCleanupLayer()
-        {
-            throw new NotImplementedException();
-        }
-
         internal override void OnInitializeLayer()
         {
-            throw new NotImplementedException();
+            if (!System.IO.Directory.Exists(TideFusionPath))
+                System.IO.Directory.CreateDirectory(TideFusionPath);
         }
 
         internal override void OnLateInitializeLayer()
@@ -47,20 +47,6 @@ namespace LabFusion.Network.Riptide
         {
             // Create the basic options
             CreateMatchmakingMenu(category);
-            Keyboard.CreateKeyboard(category, "Test Keyboard", (text) =>
-            {
-                FusionNotification keyboardTest = new FusionNotification()
-                {
-                    title = "Keyboard Test",
-                    showTitleOnPopup = true,
-                    message = $"Keyboard Text: {text}",
-                    isMenuItem = false,
-                    isPopup = true,
-                    popupLength = 2f,
-                };
-
-                FusionNotifier.Send(keyboardTest);
-            });
             BoneMenuCreator.CreateGamemodesMenu(category);
             BoneMenuCreator.CreateSettingsMenu(category);
             BoneMenuCreator.CreateNotificationsMenu(category);
@@ -71,21 +57,32 @@ namespace LabFusion.Network.Riptide
 #endif
         }
 
-        // Matchmaking menu
-        private MenuCategory _serverInfoCategory;
-        private MenuCategory _manualJoiningCategory;
+        // P2P Matchmaking
+        private MenuCategory _p2pServerInfoCategory;
+        private MenuCategory _p2pManualJoiningCategory;
+        private MenuCategory _p2pServerListCategory;
+
+        // Public Lobby Matchmaking (Future)
+        private MenuCategory _publicMatchmakingCategory;
+        private MenuCategory _publicServerInfoCategory;
+        private MenuCategory _publicManualJoiningCategory;
+
         private void CreateMatchmakingMenu(MenuCategory category)
         {
             // Root category
             var matchmaking = category.CreateCategory("Matchmaking", Color.red);
 
+            var _p2pMatchmakingCategory = matchmaking.CreateCategory("P2P Matchmaking", Color.white);
+
             // Server making
-            _serverInfoCategory = matchmaking.CreateCategory("Server Info", Color.white);
-            CreateServerInfoMenu(_serverInfoCategory);
+            _p2pServerInfoCategory = _p2pMatchmakingCategory.CreateCategory("Server Info", Color.white);
+            CreateServerInfoMenu(_p2pServerInfoCategory);
 
             // Manual joining
-            _manualJoiningCategory = matchmaking.CreateCategory("Manual Joining", Color.white);
-            CreateManualJoiningMenu(_manualJoiningCategory);
+            _p2pManualJoiningCategory = _p2pMatchmakingCategory.CreateCategory("Manual Joining", Color.white);
+            CreateP2PManualJoiningMenu(_p2pManualJoiningCategory);
+
+            ServerListing.CreateServerListingCategory(_p2pMatchmakingCategory);
         }
 
         private FunctionElement _createServerElement;
@@ -113,16 +110,36 @@ namespace LabFusion.Network.Riptide
             }
         }
 
-        private FunctionElement _targetServerElement;
-        private void CreateManualJoiningMenu(MenuCategory category)
+        private MenuCategory _targetP2PServerCategory;
+        private string _serverCodeToJoin;
+        private void CreateP2PManualJoiningMenu(MenuCategory category)
         {
-            category.CreateFunctionElement("Join Server", Color.white, OnClickConnectToServer);
-            _targetServerElement = category.CreateFunctionElement("Server ID:", Color.white, null);
+            category.CreateFunctionElement("Join Server", Color.white, () => OnClickP2PJoin());
+            _targetP2PServerCategory = Keyboard.CreateKeyboard(category, "Server Code:", OnChangeServerCode).Category;
         }
 
-        private void OnClickConnectToServer()
+        private void OnChangeServerCode(string code)
         {
+            _serverCodeToJoin = code;
+            _targetP2PServerCategory.SetName($"Server Code:\n{_serverCodeToJoin}");
+        }
 
+        private void OnClickP2PJoin()
+        {
+            if (_serverCodeToJoin == null)
+            {
+                FusionNotification serverCodeWarning = new FusionNotification()
+                {
+                    title = "No Server Code",
+                    showTitleOnPopup = true,
+                    message = $"You have not entered a server code to join! Please click on the \"Server Code\" button to enter a server code!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.WARNING
+                };
+                FusionNotifier.Send(serverCodeWarning);
+            }
         }
 
         internal override void OnUpdateLobby()
@@ -130,12 +147,7 @@ namespace LabFusion.Network.Riptide
             throw new NotImplementedException();
         }
 
-        internal override void StartServer()
-        {
-            CurrentServer.Start(7777, 256);
-
-            CurrentClient.Connected += OnConnect;
-        }
+        internal override void StartServer() => ServerManagement.StartServer();
 
         private void OnConnect(object sender, EventArgs e)
         {
@@ -143,6 +155,11 @@ namespace LabFusion.Network.Riptide
         }
 
         internal override void Disconnect(string reason = "")
+        {
+            throw new NotImplementedException();
+        }
+
+        internal override void OnCleanupLayer()
         {
             throw new NotImplementedException();
         }

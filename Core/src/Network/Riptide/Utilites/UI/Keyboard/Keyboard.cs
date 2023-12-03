@@ -21,7 +21,10 @@ namespace LabFusion.Network.Riptide.Utilities
         public Action<string> OnEnter;
         public MenuCategory Category;
         public GameObject KeyboardObject;
-        public static void CreateKeyboard(BoneLib.BoneMenu.Elements.MenuCategory category, string name, Action<string> onEnter)
+
+        private static UIManager UiManagerInstance;
+
+        public static Keyboard CreateKeyboard(BoneLib.BoneMenu.Elements.MenuCategory category, string name, Action<string> onEnter)
         {
             Keyboard keyboard = new Keyboard();
 
@@ -41,13 +44,13 @@ namespace LabFusion.Network.Riptide.Utilities
             if (keyboardObject == null )
             {
                 FusionLogger.Error($"Keyboard is null for keyboard {name}!");
-                return;
+                return null;
             }
             var canvas = keyboardObject.transform.Find("Keyboard").Find("Canvas");
             if (canvas == null)
             {
                 FusionLogger.Error($"Canvas is null for keyboard {name}!");
-                return;
+                return null;
             }
 
             var keyboardCanvas = canvas.gameObject.AddComponent<KeyboardCanvas>();
@@ -57,6 +60,8 @@ namespace LabFusion.Network.Riptide.Utilities
 
             Keyboards.Add(keyboard);
             keyboardObject.SetActive(false);
+
+            return keyboard;
         }
 
         [HarmonyPatch(typeof(UIManager), nameof(UIManager.OnCategoryUpdated))]
@@ -111,9 +116,29 @@ namespace LabFusion.Network.Riptide.Utilities
                         {
                             if (category == keyboard.Category.Parent || category == MenuManager.RootCategory)
                             {
-                                keyboard.KeyboardObject.SetActive(false);
+                                if (keyboard.KeyboardObject != null) 
+                                    keyboard.KeyboardObject.SetActive(false);
                             }
                         }
+                    }
+                }
+
+                UiManagerInstance = __instance;
+            }
+        }
+
+        [HarmonyPatch(typeof(MenuManager), nameof(MenuManager.SelectCategory))]
+        public class CategorySelectPatch
+        {
+            public static void Postfix(MenuCategory category)
+            {
+                foreach (var obj in Keyboards)
+                {
+                    if (category == obj.Category.Parent)
+                    {
+                        UiManagerInstance.MainPage.transform.Find("ScrollDown").gameObject.SetActive(true);
+                        UiManagerInstance.MainPage.transform.Find("ScrollUp").gameObject.SetActive(true);
+                        UiManagerInstance.MainPage.transform.Find("Return").gameObject.SetActive(true);
                     }
                 }
             }

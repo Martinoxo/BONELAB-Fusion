@@ -461,11 +461,15 @@
     <Compile Include="Core\src\Network\Proxy\ProxySocketHandler.cs" />
     <Compile Include="Core\src\Network\Proxy\ProxyVoiceManager.cs" />
     <Compile Include="Core\src\Network\Proxy\ProxyVoiceHandler.cs" />
+    <Compile Include="Core\src\Network\Riptide\BoneMenu\ServerListing.cs" />
+    <Compile Include="Core\src\Network\Riptide\Layer\Client\ClientManagement.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\RiptideNetworkLayer.cs" />
-    <Compile Include="Core\src\Network\Riptide\Utilites\PlayerInfo.cs" />
+    <Compile Include="Core\src\Network\Riptide\Layer\Server\ServerManagement.cs" />
+    <Compile Include="Core\src\Network\Riptide\Utilites\Data\ServerListSaving.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\ServerTypes.cs" />
-    <Compile Include="Core\src\Network\Riptide\Utilites\UI\Keyboard\KeyboardCanvas.cs" />
+    <Compile Include="Core\src\Network\Riptide\Utilites\PlayerInfo.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\UI\Keyboard\Keyboard.cs" />
+    <Compile Include="Core\src\Network\Riptide\Utilites\UI\Keyboard\KeyboardCanvas.cs" />
     <Compile Include="Core\src\Network\Steam\SpacewarNetworkLayer.cs" />
     <Compile Include="Core\src\Network\Steam\SteamVoiceManager.cs" />
     <Compile Include="Core\src\Network\Steam\SteamVRNetworkLayer.cs" />
@@ -895,7 +899,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Core\managed\Oculus.Platform.dll</HintPath>
     </Reference>
-    <Reference Include="RiptideNetworking">
+    <Reference Include="RiptideNetworking, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>Core\managed\RiptideNetworking.dll</HintPath>
     </Reference>
     <Reference Include="SLZ.Algorithms, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -1467,6 +1472,8 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Core\src\Network\Riptide\Layer\Client\Client Handlers\" />
+    <Folder Include="Core\src\Network\Riptide\Layer\Server\Server Handlers\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>

@@ -300,9 +300,6 @@ namespace LabFusion.UI
                         break;
 
                 }
-#if DEBUG
-                FusionLogger.Log($"Added keyboard register for key {button.gameObject.name}");
-#endif
             }
 
             OnCycleSpecials();
@@ -333,11 +330,11 @@ namespace LabFusion.UI
 
         private void OnClickEnter()
         {
-            if (Keyboard.OnEnter != null)
-                Keyboard.OnEnter.Invoke(DisplayTMP.text);
-
             DisplayTMP.SetText("");
             BoneLib.BoneMenu.MenuManager.SelectCategory(Keyboard.Category.Parent);
+
+            if (Keyboard.OnEnter != null)
+                Keyboard.OnEnter.Invoke(DisplayTMP.text);
         }
 
         private void OnCycleCaps()
