@@ -11,7 +11,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace LabFusion.UI
+namespace LabFusion.Network.Riptide
 {
     [RegisterTypeInIl2Cpp]
     public class KeyboardCanvas : MonoBehaviour

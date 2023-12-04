@@ -11,8 +11,9 @@ using HarmonyLib;
 using LabFusion.Utilities;
 using System.Configuration;
 using LabFusion.UI;
+using SLZ.Props;
 
-namespace LabFusion.Network.Riptide.Utilities
+namespace LabFusion.Network.Riptide
 {
     public class Keyboard
     {
@@ -102,24 +103,12 @@ namespace LabFusion.Network.Riptide.Utilities
                             keyboard.KeyboardObject.transform.localPosition = Vector3.forward;
                             keyboard.KeyboardObject.transform.localRotation = Quaternion.identity;
                             keyboard.KeyboardObject.transform.localScale = new Vector3 (180, 180, 180);
-                        }
-                        else
-                        {
+                        } else
                             keyboard.KeyboardObject.SetActive(true);
-                        }
-
-                        break;
                     }
                     else
                     {
-                        foreach (var keyboard in Keyboards)
-                        {
-                            if (category == keyboard.Category.Parent || category == MenuManager.RootCategory)
-                            {
-                                if (keyboard.KeyboardObject != null) 
-                                    keyboard.KeyboardObject.SetActive(false);
-                            }
-                        }
+
                     }
                 }
 
@@ -132,14 +121,10 @@ namespace LabFusion.Network.Riptide.Utilities
         {
             public static void Postfix(MenuCategory category)
             {
-                foreach (var obj in Keyboards)
+                foreach (var keyboard in Keyboards)
                 {
-                    if (category == obj.Category.Parent)
-                    {
-                        UiManagerInstance.MainPage.transform.Find("ScrollDown").gameObject.SetActive(true);
-                        UiManagerInstance.MainPage.transform.Find("ScrollUp").gameObject.SetActive(true);
-                        UiManagerInstance.MainPage.transform.Find("Return").gameObject.SetActive(true);
-                    }
+                    if (keyboard.Category == category)
+                        keyboard.KeyboardObject.SetActive(false);
                 }
             }
         }

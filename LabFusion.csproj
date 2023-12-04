@@ -468,8 +468,8 @@
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\ServerListSaving.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\ServerTypes.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\PlayerInfo.cs" />
-    <Compile Include="Core\src\Network\Riptide\Utilites\UI\Keyboard\Keyboard.cs" />
-    <Compile Include="Core\src\Network\Riptide\Utilites\UI\Keyboard\KeyboardCanvas.cs" />
+    <Compile Include="Core\src\Network\Riptide\BoneMenu\UI\Keyboard\Keyboard.cs" />
+    <Compile Include="Core\src\Network\Riptide\BoneMenu\UI\Keyboard\KeyboardCanvas.cs" />
     <Compile Include="Core\src\Network\Steam\SpacewarNetworkLayer.cs" />
     <Compile Include="Core\src\Network\Steam\SteamVoiceManager.cs" />
     <Compile Include="Core\src\Network\Steam\SteamVRNetworkLayer.cs" />
