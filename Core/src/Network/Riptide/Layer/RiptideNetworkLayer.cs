@@ -81,8 +81,6 @@ namespace LabFusion.Network.Riptide
             // Manual joining
             _p2pManualJoiningCategory = _p2pMatchmakingCategory.CreateCategory("Manual Joining", Color.white);
             CreateP2PManualJoiningMenu(_p2pManualJoiningCategory);
-
-            ServerListing.CreateServerListingCategory(_p2pMatchmakingCategory);
         }
 
         private FunctionElement _createServerElement;

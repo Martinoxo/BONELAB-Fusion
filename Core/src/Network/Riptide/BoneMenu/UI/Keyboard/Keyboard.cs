@@ -70,25 +70,27 @@ namespace LabFusion.Network.Riptide
         {
             public static void Postfix(UIManager __instance, MenuCategory category)
             {
+#if DEBUG
+                FusionLogger.Log("Category Update Patch");
+#endif
                 foreach (var obj in Keyboards)
                 {
                     if (obj.Category == category)
                     {
-                        var keyboard = obj;
                         __instance.MainPage.transform.Find("ScrollDown").gameObject.SetActive(false);
                         __instance.MainPage.transform.Find("ScrollUp").gameObject.SetActive(false);
                         __instance.MainPage.transform.Find("Return").gameObject.SetActive(false);
 
-                        if (keyboard.KeyboardObject == null)
+                        if (obj.KeyboardObject == null)
                         {
-                            keyboard.KeyboardObject = GameObject.Instantiate(FusionContentLoader.KeyboardPrefab);
-                            keyboard.KeyboardObject.SetActive(true);
-                            if (keyboard.KeyboardObject == null)
+                            obj.KeyboardObject = GameObject.Instantiate(FusionContentLoader.KeyboardPrefab);
+                            obj.KeyboardObject.SetActive(true);
+                            if (obj.KeyboardObject == null)
                             {
                                 FusionLogger.Error($"Keyboard is null!");
                                 return;
                             }
-                            var canvas = keyboard.KeyboardObject.transform.Find("Keyboard").Find("Canvas");
+                            var canvas = obj.KeyboardObject.transform.Find("Keyboard").Find("Canvas");
                             if (canvas == null)
                             {
                                 FusionLogger.Error($"Canvas is null!");
@@ -96,23 +98,19 @@ namespace LabFusion.Network.Riptide
                             }
 
                             var keyboardCanvas = canvas.gameObject.AddComponent<KeyboardCanvas>();
-                            keyboardCanvas.Keyboard = keyboard;
+                            keyboardCanvas.Keyboard = obj;
                             keyboardCanvas.SetupReferences();
 
-                            keyboard.KeyboardObject.transform.parent = __instance.MainPage.transform;
-                            keyboard.KeyboardObject.transform.localPosition = Vector3.forward;
-                            keyboard.KeyboardObject.transform.localRotation = Quaternion.identity;
-                            keyboard.KeyboardObject.transform.localScale = new Vector3 (180, 180, 180);
+                            obj.KeyboardObject.transform.parent = __instance.MainPage.transform;
+                            obj.KeyboardObject.transform.localPosition = Vector3.forward;
+                            obj.KeyboardObject.transform.localRotation = Quaternion.identity;
+                            obj.KeyboardObject.transform.localScale = new Vector3 (180, 180, 180);
                         } else
-                            keyboard.KeyboardObject.SetActive(true);
-                    }
-                    else
-                    {
+                            obj.KeyboardObject.SetActive(true);
 
+                        break;
                     }
                 }
-
-                UiManagerInstance = __instance;
             }
         }
 
@@ -121,9 +119,14 @@ namespace LabFusion.Network.Riptide
         {
             public static void Postfix(MenuCategory category)
             {
+#if  DEBUG
+                FusionLogger.Log("Select Category Patch");          
+#endif
                 foreach (var keyboard in Keyboards)
                 {
                     if (keyboard.Category == category)
+                        keyboard.KeyboardObject.SetActive(true);
+                    else
                         keyboard.KeyboardObject.SetActive(false);
                 }
             }
