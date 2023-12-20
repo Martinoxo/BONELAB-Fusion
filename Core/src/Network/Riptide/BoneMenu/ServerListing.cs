@@ -1,6 +1,6 @@
 ﻿using BoneLib.BoneMenu.Elements;
 using LabFusion.BoneMenu;
-using LabFusion.Network.Riptide.Utilities;
+using LabFusion.Riptide.Utilities;
 using LabFusion.Utilities;
 using SLZ.Marrow.Warehouse;
 using System;
@@ -13,19 +13,21 @@ using System.Windows.Forms;
 using UnityEngine;
 using UnityEngine.Playables;
 
-namespace LabFusion.Network.Riptide.BoneMenu
+namespace LabFusion.Riptide.BoneMenu
 {
     public class ServerListingCategory
     {
         private MenuCategory _category;
 
-        private string _nameToEnter;
-        private string _codeToEnter;
+        private string _nameToEnter = "";
+        private string _codeToEnter = "";
         private int _portToEnter = 7777;
 
         private Keyboard _nameKeyboard;
         private Keyboard _codeKeyboard;
         private Keyboard _portKeyboard;
+
+        private List<MenuCategory> _listingCategories = new List<MenuCategory>();
         
         public static void CreateServerListingCategory(MenuCategory category)
         {
@@ -34,25 +36,26 @@ namespace LabFusion.Network.Riptide.BoneMenu
 
             var createCategory = serverListingCategory._category.CreateCategory("Create Listing", Color.green);
             
-            serverListingCategory._nameKeyboard = Keyboard.CreateKeyboard(createCategory, "Edit Name", serverListingCategory.OnEnterName);
-            serverListingCategory._codeKeyboard = Keyboard.CreateKeyboard(createCategory, "Edit Join Code", serverListingCategory.OnEnterCode);
-            serverListingCategory._portKeyboard = Keyboard.CreateKeyboard(createCategory, "Edit Port\n" +
-                $"7777", serverListingCategory.OnEnterPort);
+            serverListingCategory._nameKeyboard = Keyboard.CreateKeyboard(createCategory, $"Edit Name:\n{serverListingCategory._nameToEnter}", (name) => serverListingCategory.OnEnterName(name));
+            serverListingCategory._codeKeyboard = Keyboard.CreateKeyboard(createCategory, $"Edit Code:\n{serverListingCategory._codeToEnter}", (code) => serverListingCategory.OnEnterCode(code));
+            serverListingCategory._portKeyboard = Keyboard.CreateKeyboard(createCategory, $"Edit Port:\n{serverListingCategory._portToEnter}", (port) => serverListingCategory.OnEnterPort(port));
 
-            createCategory.CreateFunctionElement("Done", Color.green, serverListingCategory.OnClickDone);
+            createCategory.CreateFunctionElement("Done", Color.green, () => serverListingCategory.OnClickDone());
+
+            serverListingCategory.CreateServerList(serverListingCategory._category);
         }
 
         private void OnEnterName(string name)
         {
             _nameToEnter = name;
-            _nameKeyboard.Category.SetName($"Edit Name\n" +
+            _nameKeyboard.Category.SetName($"Edit Name:\n" +
                                            $"{name}");
         }
 
         private void OnEnterCode(string code)
         {
             _codeToEnter = code;
-            _codeKeyboard.Category.SetName($"Edit Code\n" +
+            _codeKeyboard.Category.SetName($"Edit Code:\n" +
                                            $"{code}");
         }
 
@@ -73,7 +76,7 @@ namespace LabFusion.Network.Riptide.BoneMenu
             }
 
             _portToEnter = result;
-            _portKeyboard.Category.SetName($"Edit Port\n" +
+            _portKeyboard.Category.SetName($"Edit Port:\n" +
                                            $"{result}");
         }
 
@@ -84,25 +87,24 @@ namespace LabFusion.Network.Riptide.BoneMenu
             data.ServerCode = _codeToEnter;
             data.Port = _portToEnter;
             ServerListSaving.SaveServerList(data);
-            
-            _category.Elements.Clear();
-            
-            var createCategory = _category.CreateCategory("Create Listing", Color.green);
-            _nameKeyboard = Keyboard.CreateKeyboard(createCategory, "Edit Name", OnEnterName);
-            _codeKeyboard = Keyboard.CreateKeyboard(createCategory, "Edit Join Code", OnEnterCode);
-            _portKeyboard = Keyboard.CreateKeyboard(createCategory, "Edit Port\n" +
-                $"7777", OnEnterPort);
-            createCategory.CreateFunctionElement("Done", Color.green, OnClickDone);
 
-            foreach (var listing in ServerListSaving.LoadServerList())
+            foreach (var category in _listingCategories)
             {
-                var listingCategory = _category.CreateCategory(listing.Name, Color.white);
-                var infoPanel = listingCategory.CreateSubPanel("Show Server Info", Color.yellow);
-                infoPanel.CreateFunctionElement($"Server Code:\n{listing.ServerCode}", Color.white, null);
-                infoPanel.CreateFunctionElement($"Server Port:\n{listing.Port}", Color.white, null);
-                listingCategory.CreateFunctionElement("Delete Listing", Color.red, () => OnClickDelete(listing, listingCategory));
-                listingCategory.CreateFunctionElement("Connect to Server", Color.green, null);
+                _category.Elements.Remove(category);
+                _listingCategories.Remove(category);
             }
+
+            CreateServerList(_category);
+
+            BoneLib.BoneMenu.MenuManager.SelectCategory(_category);
+
+            _nameToEnter = "";
+            _codeToEnter = "";
+            _portToEnter = 7777;
+
+            _nameKeyboard.Category.SetName($"Edit Name:\n{_nameToEnter}");
+            _codeKeyboard.Category.SetName($"Edit Code:\n{_codeToEnter}");
+            _portKeyboard.Category.SetName($"Edit Port:\n{_portToEnter}");
         }
 
         private void OnClickDelete(ServerListData data, MenuCategory category)
@@ -111,6 +113,22 @@ namespace LabFusion.Network.Riptide.BoneMenu
             _category.Elements.Remove(category);
             
             BoneLib.BoneMenu.MenuManager.SelectCategory(_category);
+        }
+
+        private void CreateServerList(MenuCategory category)
+        {
+            foreach (var listing in ServerListSaving.LoadServerList())
+            {
+                var listingCategory = category.CreateCategory(listing.Name, Color.white);
+                var infoPanel = listingCategory.CreateSubPanel("Show Server Info", Color.yellow);
+                infoPanel.CreateFunctionElement($"Server Code:\n{listing.ServerCode}", Color.white, null);
+                infoPanel.CreateFunctionElement($"Server Port:\n{listing.Port}", Color.white, null);
+                infoPanel.CreateFunctionElement("Delete Listing", Color.red, () => OnClickDelete(listing, listingCategory));
+                
+                listingCategory.CreateFunctionElement("Connect to Server", Color.green, null);
+
+                _listingCategories.Add(listingCategory);
+            }
         }
     }
 }

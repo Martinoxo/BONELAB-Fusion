@@ -1,4 +1,4 @@
-﻿using LabFusion.Network.Riptide.Utilities;
+﻿using LabFusion.Riptide.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,12 +10,14 @@ using LabFusion.BoneMenu;
 using UnityEngine;
 using BoneLib;
 using LabFusion.Utilities;
-using static LabFusion.Network.Riptide.ServerManagement;
-using static LabFusion.Network.Riptide.ClientManagement;
+using static LabFusion.Riptide.ServerManagement;
+using static LabFusion.Riptide.ClientManagement;
 using MelonLoader;
-using LabFusion.Network.Riptide.BoneMenu;
+using LabFusion.Riptide.BoneMenu;
+using LabFusion.Network;
+using LabFusion.Riptide.Preferences;
 
-namespace LabFusion.Network.Riptide
+namespace LabFusion.Riptide
 {
     public class RiptideNetworkLayer : NetworkLayer
     {
@@ -23,8 +25,8 @@ namespace LabFusion.Network.Riptide
 
         public ServerTypes CurrentServerType = ServerTypes.None;
 
-        internal override bool IsClient => _currentClient.IsConnected;
-        internal override bool IsServer => _currentServer.IsRunning;
+        internal override bool IsClient => CurrentClient.IsConnected;
+        internal override bool IsServer => CurrentServer.IsRunning;
 
         internal override string Title => "Riptide";
 
@@ -36,6 +38,8 @@ namespace LabFusion.Network.Riptide
         {
             if (!System.IO.Directory.Exists(TideFusionPath))
                 System.IO.Directory.CreateDirectory(TideFusionPath);
+
+            RiptidePreferences.OnInitializePreferences();
         }
 
         internal override void OnLateInitializeLayer()
@@ -60,7 +64,6 @@ namespace LabFusion.Network.Riptide
         // P2P Matchmaking
         private MenuCategory _p2pServerInfoCategory;
         private MenuCategory _p2pManualJoiningCategory;
-        private MenuCategory _p2pServerListCategory;
 
         // Public Lobby Matchmaking (Future)
         private MenuCategory _publicMatchmakingCategory;
@@ -81,6 +84,9 @@ namespace LabFusion.Network.Riptide
             // Manual joining
             _p2pManualJoiningCategory = _p2pMatchmakingCategory.CreateCategory("Manual Joining", Color.white);
             CreateP2PManualJoiningMenu(_p2pManualJoiningCategory);
+
+            // Server Listings
+            ServerListingCategory.CreateServerListingCategory(_p2pMatchmakingCategory);
         }
 
         private FunctionElement _createServerElement;
@@ -113,7 +119,7 @@ namespace LabFusion.Network.Riptide
         private void CreateP2PManualJoiningMenu(MenuCategory category)
         {
             category.CreateFunctionElement("Join Server", Color.white, () => OnClickP2PJoin());
-            _targetP2PServerCategory = Keyboard.CreateKeyboard(category, "Server Code:", OnChangeServerCode).Category;
+            _targetP2PServerCategory = Keyboard.CreateKeyboard(category, "Server Code:", (code) => OnChangeServerCode(code)).Category;
         }
 
         private void OnChangeServerCode(string code)

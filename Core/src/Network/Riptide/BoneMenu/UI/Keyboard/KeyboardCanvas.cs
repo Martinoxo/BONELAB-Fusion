@@ -1,4 +1,4 @@
-﻿using LabFusion.Network.Riptide.Utilities;
+﻿using LabFusion.Riptide.Utilities;
 using LabFusion.Utilities;
 using MelonLoader;
 using System;
@@ -11,7 +11,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace LabFusion.Network.Riptide
+namespace LabFusion.Riptide.BoneMenu
 {
     [RegisterTypeInIl2Cpp]
     public class KeyboardCanvas : MonoBehaviour
@@ -298,7 +298,6 @@ namespace LabFusion.Network.Riptide
                     case "button_Back":
                         button.AddClickEvent(OnClickBack);
                         break;
-
                 }
             }
 
@@ -330,11 +329,12 @@ namespace LabFusion.Network.Riptide
 
         private void OnClickEnter()
         {
-            DisplayTMP.SetText("");
             BoneLib.BoneMenu.MenuManager.SelectCategory(Keyboard.Category.Parent);
 
             if (Keyboard.OnEnter != null)
                 Keyboard.OnEnter.Invoke(DisplayTMP.text);
+
+            DisplayTMP.SetText("");
         }
 
         private void OnCycleCaps()

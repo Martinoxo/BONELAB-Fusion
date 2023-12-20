@@ -13,7 +13,7 @@ using System.Configuration;
 using LabFusion.UI;
 using SLZ.Props;
 
-namespace LabFusion.Network.Riptide
+namespace LabFusion.Riptide.BoneMenu
 {
     public class Keyboard
     {
@@ -102,13 +102,19 @@ namespace LabFusion.Network.Riptide
                             keyboardCanvas.SetupReferences();
 
                             obj.KeyboardObject.transform.parent = __instance.MainPage.transform;
-                            obj.KeyboardObject.transform.localPosition = Vector3.forward;
+                            obj.KeyboardObject.transform.localPosition = new Vector3 (0, 0, 0);
                             obj.KeyboardObject.transform.localRotation = Quaternion.identity;
                             obj.KeyboardObject.transform.localScale = new Vector3 (180, 180, 180);
                         } else
                             obj.KeyboardObject.SetActive(true);
 
                         break;
+                    }
+                    else
+                    {
+                        __instance.MainPage.transform.Find("ScrollDown").gameObject.SetActive(true);
+                        __instance.MainPage.transform.Find("ScrollUp").gameObject.SetActive(true);
+                        __instance.MainPage.transform.Find("Return").gameObject.SetActive(true);
                     }
                 }
             }
@@ -124,6 +130,9 @@ namespace LabFusion.Network.Riptide
 #endif
                 foreach (var keyboard in Keyboards)
                 {
+                    if (keyboard.KeyboardObject == null)
+                        return;
+
                     if (keyboard.Category == category)
                         keyboard.KeyboardObject.SetActive(true);
                     else

@@ -3,31 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using LabFusion.Riptide.Preferences;
 using Riptide;
 
-namespace LabFusion.Network.Riptide
+namespace LabFusion.Riptide
 {
     public static class ServerManagement
     {
-        public static Server _currentServer = new();
-        private static int ServerPort = 7777;
+        public static Server CurrentServer = new();
 
         public static void StartServer()
         {
-            if (_currentServer.IsRunning)
-            {
-                StopServer();
-                return;
-            }
+            if (CurrentServer.IsRunning)
+                CurrentServer.Stop();
 
-            _currentServer.TimeoutTime = 60;
-        }
-
-        public static void StopServer()
-        {
-            if (!_currentServer.IsRunning)
-                return;
+            CurrentServer.Start(RiptidePreferences.LocalServerSettings.ServerPort.GetValue(), 256);
         }
     }
 }

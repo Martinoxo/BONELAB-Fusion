@@ -16,7 +16,7 @@ using MelonLoader;
 using UnityEngine.Networking;
 using Il2CppNewtonsoft.Json;
 
-namespace LabFusion.Network.Riptide.Utilities
+namespace LabFusion.Riptide.Utilities
 {
     public static class PlayerInfo
     {

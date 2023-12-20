@@ -9,7 +9,7 @@ using UnhollowerBaseLib;
 using Il2CppNewtonsoft.Json;
 using System.Web;
 
-namespace LabFusion.Network.Riptide.Utilities
+namespace LabFusion.Riptide.Utilities
 {
     internal static class ServerListSaving
     {
