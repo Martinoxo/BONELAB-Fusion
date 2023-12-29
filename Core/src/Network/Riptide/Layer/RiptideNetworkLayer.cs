@@ -19,6 +19,7 @@ using LabFusion.Representation;
 using System.Web.Services.Description;
 using LabFusion.Preferences;
 using Riptide.Utils;
+using System.Reflection;
 
 namespace LabFusion.Riptide
 {
@@ -118,7 +119,7 @@ namespace LabFusion.Riptide
 
         private void CreateServerInfoMenu(MenuCategory category)
         {
-            _createServerElement = category.CreateFunctionElement("Start Server", Color.white, () => OnClickStartServer());
+            _createServerElement = category.CreateFunctionElement("Start Server", Color.white, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host! Make sure you have done this!");
 
             var p2pServerSettingsMenu = category.CreateCategory("Riptide Server Settings", Color.cyan);
             _serverPortKeyboard = Keyboard.CreateKeyboard(p2pServerSettingsMenu, $"Server Port:\n{FusionPreferences.ClientSettings.ServerPort.GetValue()}", (port) => OnChangeServerPort(port));
@@ -226,19 +227,23 @@ namespace LabFusion.Riptide
             OnUpdateCreateServerText();
         }
 
+        private FieldInfo _fieldInfo = typeof(FunctionElement).GetField("_confirmer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         private void OnUpdateCreateServerText()
         {
             if (CurrentClient.IsConnected && !CurrentServer.IsRunning)
             {
                 _createServerElement.SetName("Disconnect");
+                _fieldInfo.SetValue(_createServerElement, false);
             }
             else if (CurrentServer.IsRunning)
             {
                 _createServerElement.SetName("Stop Server");
+                _fieldInfo.SetValue(_createServerElement, false);
             }
             else if (!CurrentClient.IsConnected)
             {
                 _createServerElement.SetName("Start P2P Server");
+                _fieldInfo.SetValue(_createServerElement, true);
             }
         }
 
@@ -297,8 +302,6 @@ namespace LabFusion.Riptide
 
             if (IsServer)
                 CurrentServer.Stop();
-
-            InternalServerHelpers.OnDisconnect(reason);
 
             OnUpdateLobby();
         }
