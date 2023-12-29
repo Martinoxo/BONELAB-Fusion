@@ -115,6 +115,9 @@ namespace LabFusion.Riptide.BoneMenu
                         __instance.MainPage.transform.Find("ScrollDown").gameObject.SetActive(true);
                         __instance.MainPage.transform.Find("ScrollUp").gameObject.SetActive(true);
                         __instance.MainPage.transform.Find("Return").gameObject.SetActive(true);
+
+                        if (obj.KeyboardObject != null)
+                            obj.KeyboardObject.SetActive(false);
                     }
                 }
             }

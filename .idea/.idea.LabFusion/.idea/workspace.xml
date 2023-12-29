@@ -9,8 +9,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="76a7a886-e0b1-4b9f-8fa8-3d5481552dfb" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Core/src/Data/Files/ResourcePaths.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/src/Data/Files/ResourcePaths.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Core/src/Utilities/Fusion/FusionContentLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/src/Utilities/Fusion/FusionContentLoader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.LabFusion/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.LabFusion/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/FusionBundles/Assets/Content/Materials/mat_Keyboard.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Core/FusionBundles/Assets/Content/Materials/mat_Keyboard.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/FusionBundles/Assets/Content/Prefabs/ui_Keyboard.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Core/FusionBundles/Assets/Content/Prefabs/ui_Keyboard.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/FusionBundles/ProjectSettings/QualitySettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Core/FusionBundles/ProjectSettings/QualitySettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/FusionBundles/ProjectSettings/ShaderGraphSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Core/FusionBundles/ProjectSettings/ShaderGraphSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/resources/bundles/Android/content_bundle.fusion" beforeDir="false" afterPath="$PROJECT_DIR$/Core/resources/bundles/Android/content_bundle.fusion" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/resources/bundles/Android/item_bundle.fusion" beforeDir="false" afterPath="$PROJECT_DIR$/Core/resources/bundles/Android/item_bundle.fusion" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/resources/bundles/StandaloneWindows64/content_bundle.fusion" beforeDir="false" afterPath="$PROJECT_DIR$/Core/resources/bundles/StandaloneWindows64/content_bundle.fusion" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/resources/bundles/StandaloneWindows64/item_bundle.fusion" beforeDir="false" afterPath="$PROJECT_DIR$/Core/resources/bundles/StandaloneWindows64/item_bundle.fusion" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/src/Network/Riptide/BoneMenu/ServerListing.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/src/Network/Riptide/BoneMenu/ServerListing.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/src/Network/Riptide/BoneMenu/UI/Keyboard/Keyboard.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/src/Network/Riptide/BoneMenu/UI/Keyboard/Keyboard.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/src/Network/Riptide/Layer/Client/Client Handlers/FusionMessageHandler.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/src/Network/Riptide/Layer/Client/ClientManagement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/src/Network/Riptide/Layer/Client/ClientManagement.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/src/Network/Riptide/Layer/RiptideNetworkLayer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/src/Network/Riptide/Layer/RiptideNetworkLayer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/src/Network/Riptide/Layer/Server/ServerManagement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/src/Network/Riptide/Layer/Server/ServerManagement.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Core/src/Network/Riptide/Preferences/RiptidePreferences.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Core/src/Network/Riptide/Preferences/RiptidePreferences.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/LabFusion.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/LabFusion.csproj" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,7 +64,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Fusion-Commiting&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -140,6 +155,9 @@
       <workItem from="1702820507655" duration="30000" />
       <workItem from="1702820554078" duration="8082000" />
       <workItem from="1702833630922" duration="2885000" />
+      <workItem from="1703114461717" duration="15000" />
+      <workItem from="1703114503259" duration="27000" />
+      <workItem from="1703115890417" duration="42000" />
     </task>
     <task id="LOCAL-00001" summary="Backup">
       <option name="closed" value="true" />

@@ -15,7 +15,10 @@ using static LabFusion.Riptide.ClientManagement;
 using MelonLoader;
 using LabFusion.Riptide.BoneMenu;
 using LabFusion.Network;
-using LabFusion.Riptide.Preferences;
+using LabFusion.Representation;
+using System.Web.Services.Description;
+using LabFusion.Preferences;
+using Riptide.Utils;
 
 namespace LabFusion.Riptide
 {
@@ -39,12 +42,32 @@ namespace LabFusion.Riptide
             if (!System.IO.Directory.Exists(TideFusionPath))
                 System.IO.Directory.CreateDirectory(TideFusionPath);
 
-            RiptidePreferences.OnInitializePreferences();
+#if DEBUG
+            RiptideLogger.Initialize(MelonLogger.Msg, true);
+#endif
+            
+            HookRiptideEvents();
+            
+            FusionLogger.Log("Initialized Riptide layer");
         }
 
         internal override void OnLateInitializeLayer()
         {
             PlayerInfo.InitPlayerUsername();
+            PlayerInfo.InitializePlayerIPAddress();
+
+            CurrentServer.TimeoutTime = 30000;
+        }
+
+        private static void HookRiptideEvents()
+        {
+            // Riptide Hooks
+            CurrentServer.ClientDisconnected += OnClientDisconnect;
+            
+            // Riptide Messages
+            CurrentServer.MessageReceived += ServerManagement.OnMessageReceived;
+            CurrentClient.MessageReceived += ClientManagement.OnMessageReceived;
+            CurrentServer.ClientConnected += ServerManagement.OnClientConnect;
         }
 
         internal override void OnSetupBoneMenu(MenuCategory category)
@@ -90,14 +113,32 @@ namespace LabFusion.Riptide
         }
 
         private FunctionElement _createServerElement;
+        private Keyboard _serverPortKeyboard;
 
         private void CreateServerInfoMenu(MenuCategory category)
         {
-            _createServerElement = category.CreateFunctionElement("Start Server", Color.white, OnClickStartServer);
+            _createServerElement = category.CreateFunctionElement("Start Server", Color.white, () => OnClickStartServer());
 
+            var p2pServerSettingsMenu = category.CreateCategory("Riptide Server Settings", Color.cyan);
+            _serverPortKeyboard = Keyboard.CreateKeyboard(p2pServerSettingsMenu, $"Server Port:\n{FusionPreferences.ClientSettings.ServerPort.GetValue()}", (port) => OnChangeServerPort(port));
 
+            category.CreateFunctionElement("Display Server Code", Color.white, () => OnDislayServerCode());
 
             BoneMenuCreator.PopulateServerInfo(category);
+        }
+
+        private void OnDislayServerCode()
+        {
+            FusionNotifier.Send(new FusionNotification()
+            {
+                isMenuItem = false,
+                isPopup = true,
+                showTitleOnPopup = true,
+                popupLength = 20f,
+                title = "Server Code",
+                message = $"{IPExtensions.EncodeIpAddress(PlayerInfo.PlayerIpAddress)}",
+                type = NotificationType.INFORMATION,
+            });
         }
 
         private void OnClickStartServer()
@@ -110,62 +151,154 @@ namespace LabFusion.Riptide
             // Otherwise, start a server
             else
             {
-                StartServer();
+                ServerManagement.StartServer();
             }
         }
 
-        private MenuCategory _targetP2PServerCategory;
-        private string _serverCodeToJoin;
-        private void CreateP2PManualJoiningMenu(MenuCategory category)
+        private void OnChangeServerPort(string port)
         {
-            category.CreateFunctionElement("Join Server", Color.white, () => OnClickP2PJoin());
-            _targetP2PServerCategory = Keyboard.CreateKeyboard(category, "Server Code:", (code) => OnChangeServerCode(code)).Category;
-        }
-
-        private void OnChangeServerCode(string code)
-        {
-            _serverCodeToJoin = code;
-            _targetP2PServerCategory.SetName($"Server Code:\n{_serverCodeToJoin}");
-        }
-
-        private void OnClickP2PJoin()
-        {
-            if (_serverCodeToJoin == null)
+            if (!ushort.TryParse(port, out ushort result) || result <= 1024 || result >= 65535)
             {
-                FusionNotification serverCodeWarning = new FusionNotification()
+                FusionNotifier.Send(new FusionNotification()
                 {
-                    title = "No Server Code",
-                    showTitleOnPopup = true,
-                    message = $"You have not entered a server code to join! Please click on the \"Server Code\" button to enter a server code!",
                     isMenuItem = false,
                     isPopup = true,
-                    popupLength = 5f,
-                    type = NotificationType.WARNING
-                };
-                FusionNotifier.Send(serverCodeWarning);
+                    message = "Entered a Port which is incorrect!" +
+                              "\nMake SURE to only input numbers and that the port range is between 1024 and 65535",
+                    type = NotificationType.ERROR,
+                });
+
+                return;
             }
+
+            FusionPreferences.ClientSettings.ServerPort.SetValue(result);
+            _serverPortKeyboard.Category.SetName($"Server Port:\n{FusionPreferences.ClientSettings.ServerPort.GetValue()}");
+        }
+
+        private MenuCategory _targetP2PCodeCategory;
+        private MenuCategory _targetP2PPortCategory;
+        private string _serverCodeToJoin;
+        private ushort _serverPortToJoin;
+        private void CreateP2PManualJoiningMenu(MenuCategory category)
+        {
+            category.CreateFunctionElement("Join Server", Color.white, () => ClientManagement.P2PJoinServer(_serverCodeToJoin, _serverPortToJoin));
+            _targetP2PCodeCategory = Keyboard.CreateKeyboard(category, "Server Code:", (code) => OnChangeJoinCode(code)).Category;
+            _targetP2PPortCategory = Keyboard.CreateKeyboard(category, "Server Port:", (port) => OnChangeJoinPort(port)).Category;
+        }
+
+        private void OnChangeJoinCode(string code)
+        {
+            _serverCodeToJoin = code;
+            _targetP2PCodeCategory.SetName($"Server Code:\n{_serverCodeToJoin}");
+        }
+
+        private void OnChangeJoinPort(string port)
+        {
+            if (!ushort.TryParse(port, out ushort result) || result <= 1024 || result >= 65535)
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    isMenuItem = false,
+                    isPopup = true,
+                    message = "Entered a Port which is incorrect!" +
+                              "\nMake SURE to only input numbers and that the port range is between 1024 and 65535",
+                    type = NotificationType.ERROR,
+                });
+
+                return;
+            }
+
+            _serverPortToJoin = result;
+            _targetP2PPortCategory.SetName($"Edit Port:\n" +
+                                           $"{result}");
+        }
+
+        internal override void OnUpdateLayer()
+        {
+            CurrentServer.Update();
+            CurrentClient.Update();
         }
 
         internal override void OnUpdateLobby()
         {
-            throw new NotImplementedException();
+            // Update bonemenu items
+            OnUpdateCreateServerText();
+        }
+
+        private void OnUpdateCreateServerText()
+        {
+            if (IsServer)
+                _createServerElement.SetName("Stop Server");
+            if (IsClient && !IsServer)
+                _createServerElement.SetName("Disconnect");
+            if (!IsServer && !IsClient)
+                _createServerElement.SetName("Start Server");
         }
 
         internal override void StartServer() => ServerManagement.StartServer();
 
-        private void OnConnect(object sender, EventArgs e)
+        internal override void BroadcastMessage(NetworkChannel channel, FusionMessage message)
         {
-            throw new NotImplementedException();
+            if (IsServer)
+            {
+                CurrentServer.SendToAll(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel));
+            }
+            else
+            {
+                CurrentClient.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), true);
+            }
+        }
+
+        internal override void SendToServer(NetworkChannel channel, FusionMessage message)
+        {
+            CurrentClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel));
+        }
+
+        internal override void SendFromServer(byte userId, NetworkChannel channel, FusionMessage message)
+        {
+            PlayerId playerId = PlayerIdManager.GetPlayerId(userId);
+            if (playerId != null)
+            {
+                SendFromServer(playerId.LongId, channel, message);
+            }
+        }
+
+        internal override void SendFromServer(ulong userId, NetworkChannel channel, FusionMessage message)
+        {
+            if (IsServer)
+            {
+                Connection client;
+                if (userId == PlayerIdManager.LocalLongId)
+                {
+                    CurrentServer.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), (ushort)PlayerIdManager.LocalLongId);
+                }
+                else if (CurrentServer.TryGetClient((ushort)userId, out client))
+                {
+                    CurrentServer.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), client, true);
+                }
+            }
         }
 
         internal override void Disconnect(string reason = "")
         {
-            throw new NotImplementedException();
+            // Make sure we are currently in a server
+            if (!IsServer && !IsClient)
+                return;
+
+            if (IsClient)
+                CurrentClient.Disconnect();
+
+            if (IsServer)
+                CurrentServer.Stop();
+
+            InternalServerHelpers.OnDisconnect(reason);
+
+            OnUpdateLobby();
         }
 
         internal override void OnCleanupLayer()
         {
-            throw new NotImplementedException();
+            Disconnect();
         }
     }
 }

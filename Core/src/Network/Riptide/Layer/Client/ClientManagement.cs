@@ -9,6 +9,7 @@ using LabFusion.Riptide.Utilities;
 using LabFusion.Senders;
 using LabFusion.Utilities;
 using Riptide;
+using LabFusion.Network;
 
 namespace LabFusion.Riptide
 {
@@ -49,16 +50,24 @@ namespace LabFusion.Riptide
 
             CurrentClient.Connected += OnConnectToP2PServer;
 
-            CurrentClient.Connect($"{code}:{port}");
+            CurrentClient.Connect($"{code}:{port}", 5, 0, null, false);
         }
 
         private static void OnConnectToP2PServer(object sender, EventArgs e)
         {
             CurrentClient.Connected -= OnConnectToP2PServer;
 
+            CurrentClient.TimeoutTime = 30000;
+            CurrentClient.Connection.CanQualityDisconnect = false;
+            
             PlayerIdManager.SetLongId(CurrentClient.Id);
 
             ConnectionSender.SendConnectionRequest();
+        }
+        
+        public static void OnMessageReceived(object obj, MessageReceivedEventArgs args)
+        {
+            FusionMessageHandler.ReadMessage(args.Message.GetBytes());
         }
     }
 }

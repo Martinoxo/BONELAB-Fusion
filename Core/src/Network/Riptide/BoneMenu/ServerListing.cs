@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using LabFusion.Preferences;
 using UnityEngine;
 using UnityEngine.Playables;
 
@@ -21,7 +22,7 @@ namespace LabFusion.Riptide.BoneMenu
 
         private string _nameToEnter = "";
         private string _codeToEnter = "";
-        private int _portToEnter = 7777;
+        private ushort _portToEnter = 7777;
 
         private Keyboard _nameKeyboard;
         private Keyboard _codeKeyboard;
@@ -61,7 +62,7 @@ namespace LabFusion.Riptide.BoneMenu
 
         private void OnEnterPort(string port)
         {
-            if (!int.TryParse(port, out int result) || result <= 1024 || result >= 65535)
+            if (!ushort.TryParse(port, out ushort result) || result <= 1024 || result >= 65535)
             {
                 FusionNotifier.Send(new FusionNotification()
                 {
@@ -125,7 +126,7 @@ namespace LabFusion.Riptide.BoneMenu
                 infoPanel.CreateFunctionElement($"Server Port:\n{listing.Port}", Color.white, null);
                 infoPanel.CreateFunctionElement("Delete Listing", Color.red, () => OnClickDelete(listing, listingCategory));
                 
-                listingCategory.CreateFunctionElement("Connect to Server", Color.green, null);
+                listingCategory.CreateFunctionElement("Connect to Server", Color.green, () => ClientManagement.P2PJoinServer(listing.ServerCode, listing.Port));
 
                 _listingCategories.Add(listingCategory);
             }

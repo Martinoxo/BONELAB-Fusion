@@ -53,7 +53,7 @@ namespace LabFusion.Riptide.Utilities
                 ServerListData data = new ServerListData();
                 data.Name = fileData[0];
                 data.ServerCode = fileData[1];
-                data.Port = int.Parse(fileData[2]);
+                data.Port = ushort.Parse(fileData[2]);
                 data.ServerListDataPath = filePath;
 
                 dataList.Add(data);
@@ -67,7 +67,7 @@ namespace LabFusion.Riptide.Utilities
     {
         public string Name;
         public string ServerCode;
-        public int Port = 7777;
+        public ushort Port = 7777;
         public string ServerListDataPath = string.Empty;
         //TODO: SERVER KEYS
     }

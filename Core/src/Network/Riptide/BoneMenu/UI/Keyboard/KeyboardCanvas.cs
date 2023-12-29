@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using BoneLib;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using Button = UnityEngine.UI.Button;
 
 namespace LabFusion.Riptide.BoneMenu
 {
@@ -298,6 +300,12 @@ namespace LabFusion.Riptide.BoneMenu
                     case "button_Back":
                         button.AddClickEvent(OnClickBack);
                         break;
+                    case "button_Paste":
+                        if (HelperMethods.IsAndroid())
+                            button.gameObject.SetActive(false);
+                        else
+                            button.AddClickEvent(OnClickPaste);
+                        break;
                 }
             }
 
@@ -313,6 +321,19 @@ namespace LabFusion.Riptide.BoneMenu
             }
 
             DisplayTMP.SetText(DisplayTMP.text += key);
+        }
+
+        private void OnClickPaste()
+        {
+            if (!Clipboard.ContainsText())
+                return;
+
+            var text = Clipboard.GetText();
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                DisplayTMP.SetText(DisplayTMP.text += text);
+            }
         }
 
         private void OnClickBack()
