@@ -10,6 +10,8 @@ using LabFusion.Senders;
 using LabFusion.Utilities;
 using Riptide;
 using LabFusion.Network;
+using System.Drawing;
+using System.Runtime.Remoting.Messaging;
 
 namespace LabFusion.Riptide
 {
@@ -22,9 +24,13 @@ namespace LabFusion.Riptide
             if (CurrentClient.IsConnecting)
                 return;
 
+            if (CurrentClient.IsPending)
+                return;
+
+
             if (string.IsNullOrEmpty(code))
             {
-                FusionNotification serverCodeWarning = new FusionNotification()
+                FusionNotifier.Send(new FusionNotification()
                 {
                     title = "No Server Code",
                     showTitleOnPopup = true,
@@ -33,8 +39,7 @@ namespace LabFusion.Riptide
                     isPopup = true,
                     popupLength = 5f,
                     type = NotificationType.WARNING
-                };
-                FusionNotifier.Send(serverCodeWarning);
+                });
 
                 return;
             }
@@ -63,6 +68,36 @@ namespace LabFusion.Riptide
             PlayerIdManager.SetLongId(CurrentClient.Id);
 
             ConnectionSender.SendConnectionRequest();
+        }
+
+        public static void OnDisconnectFromServer(object sender, DisconnectedEventArgs args)
+        {
+            InternalServerHelpers.OnDisconnect(GetDisconnectReason(args.Reason));
+        }
+
+        private static string GetDisconnectReason(DisconnectReason disonnectReason)
+        {
+            switch (disonnectReason)
+            {
+                case (DisconnectReason.ConnectionRejected):
+                    return "Rejected from connecting";
+                case (DisconnectReason.Disconnected):
+                    return "Disconnected from server";
+                case (DisconnectReason.PoorConnection):
+                    return "Poor connection to server";
+                case (DisconnectReason.TransportError):
+                    return "Transport mismatch";
+                case (DisconnectReason.Kicked):
+                    return "Kicked from server";
+                case (DisconnectReason.TimedOut):
+                    return "Timed out from server";
+                case (DisconnectReason.ServerStopped):
+                    return "Server stopped";
+                case (DisconnectReason.NeverConnected):
+                    return "Never connected to server";
+                default:
+                    return "Unkown disconnect reason";
+            }
         }
         
         public static void OnMessageReceived(object obj, MessageReceivedEventArgs args)

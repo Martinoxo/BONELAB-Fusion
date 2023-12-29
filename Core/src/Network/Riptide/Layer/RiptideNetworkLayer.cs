@@ -53,7 +53,7 @@ namespace LabFusion.Riptide
 
         internal override void OnLateInitializeLayer()
         {
-            PlayerInfo.InitPlayerUsername();
+            PlayerInfo.InitializeUsername();
             PlayerInfo.InitializePlayerIPAddress();
 
             CurrentServer.TimeoutTime = 30000;
@@ -63,11 +63,12 @@ namespace LabFusion.Riptide
         {
             // Riptide Hooks
             CurrentServer.ClientDisconnected += OnClientDisconnect;
-            
+            CurrentServer.ClientConnected += OnClientConnect;
+            CurrentClient.Disconnected += OnDisconnectFromServer;
+
             // Riptide Messages
             CurrentServer.MessageReceived += ServerManagement.OnMessageReceived;
             CurrentClient.MessageReceived += ClientManagement.OnMessageReceived;
-            CurrentServer.ClientConnected += ServerManagement.OnClientConnect;
         }
 
         internal override void OnSetupBoneMenu(MenuCategory category)
@@ -178,12 +179,12 @@ namespace LabFusion.Riptide
         private MenuCategory _targetP2PCodeCategory;
         private MenuCategory _targetP2PPortCategory;
         private string _serverCodeToJoin;
-        private ushort _serverPortToJoin;
+        private ushort _serverPortToJoin = 7777;
         private void CreateP2PManualJoiningMenu(MenuCategory category)
         {
             category.CreateFunctionElement("Join Server", Color.white, () => ClientManagement.P2PJoinServer(_serverCodeToJoin, _serverPortToJoin));
             _targetP2PCodeCategory = Keyboard.CreateKeyboard(category, "Server Code:", (code) => OnChangeJoinCode(code)).Category;
-            _targetP2PPortCategory = Keyboard.CreateKeyboard(category, "Server Port:", (port) => OnChangeJoinPort(port)).Category;
+            _targetP2PPortCategory = Keyboard.CreateKeyboard(category, $"Server Port:\n{_serverPortToJoin}", (port) => OnChangeJoinPort(port)).Category;
         }
 
         private void OnChangeJoinCode(string code)
@@ -227,12 +228,18 @@ namespace LabFusion.Riptide
 
         private void OnUpdateCreateServerText()
         {
-            if (IsServer)
-                _createServerElement.SetName("Stop Server");
-            if (IsClient && !IsServer)
+            if (CurrentClient.IsConnected && !CurrentServer.IsRunning)
+            {
                 _createServerElement.SetName("Disconnect");
-            if (!IsServer && !IsClient)
-                _createServerElement.SetName("Start Server");
+            }
+            else if (CurrentServer.IsRunning)
+            {
+                _createServerElement.SetName("Stop Server");
+            }
+            else if (!CurrentClient.IsConnected)
+            {
+                _createServerElement.SetName("Start P2P Server");
+            }
         }
 
         internal override void StartServer() => ServerManagement.StartServer();

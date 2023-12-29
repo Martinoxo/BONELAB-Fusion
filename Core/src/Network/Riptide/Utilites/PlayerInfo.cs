@@ -1,70 +1,57 @@
-﻿using BoneLib;
-using SLZ.Rig;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using System;
+using System.IO;
+using BoneLib;
+using LabFusion.Representation;
+using LabFusion.Utilities;
 using Oculus.Platform;
 using Oculus.Platform.Models;
-using LabFusion.Representation;
-using Il2CppSystem;
-using LabFusion.Utilities;
 using Steamworks;
-using MelonLoader;
+using UnityEngine;
 using UnityEngine.Networking;
-using Il2CppNewtonsoft.Json;
 
 namespace LabFusion.Riptide.Utilities
 {
-    public static class PlayerInfo
+    public class PlayerInfo
     {
         internal static string PlayerIpAddress;
 
         #region USERNAME
-        public static void InitPlayerUsername()
+        public static void InitializeUsername()
         {
             if (!HelperMethods.IsAndroid())
             {
-                if (System.IO.Path.GetFileName(UnityEngine.Application.dataPath) == "BONELAB_Oculus_Windows64_Data")
+                if (Path.GetFileName(UnityEngine.Application.dataPath) == "BONELAB_Steam_Windows64_Data")
                 {
-                    Oculus.Platform.Core.Initialize("5088709007839657");
-                    Oculus.Platform.Users.GetLoggedInUser().OnComplete((Message.Callback)GetLoggedInUserCallback);
-                } 
+                    if (!SteamClient.IsValid)
+                    {
+                        SteamClient.Init(250820u, asyncCallbacks: false);
+                    }
+                    PlayerIdManager.SetUsername(SteamClient.Name);
+                    SteamClient.Shutdown();
+                }
                 else
                 {
-                    try
-                    {
-                        if (!Steamworks.SteamClient.IsValid)
-                            Steamworks.SteamClient.Init(480, false);
-
-                        PlayerIdManager.SetUsername(new Friend(SteamClient.SteamId.Value).Name);
-
-                        Steamworks.SteamClient.Shutdown();
-                    }
-                    catch (System.Exception e)
-                    {
-                        FusionLogger.Error($"Failed to initialize Steam Username! \n{e}");
-                    }
+                    Core.Initialize("5088709007839657");
+                    Users.GetLoggedInUser().OnComplete((Message<User>.Callback)GetLoggedInUserCallback);
                 }
-            } 
+            }
             else
             {
-                Oculus.Platform.Core.Initialize("4215734068529064");
-                Oculus.Platform.Users.GetLoggedInUser().OnComplete((Message.Callback)GetLoggedInUserCallback);
+                Core.Initialize("4215734068529064");
+                Users.GetLoggedInUser().OnComplete((Message<User>.Callback)GetLoggedInUserCallback);
             }
         }
 
-        private static void GetLoggedInUserCallback(Message msg)
+        private static void GetLoggedInUserCallback(Message<User> msg)
         {
-            if (!msg.IsError && msg.GetUser().DisplayName != string.Empty)
+            if (!msg.IsError)
             {
-                PlayerIdManager.SetUsername(msg.GetUser().DisplayName);
-            } 
+                PlayerIdManager.SetUsername(msg.Data.OculusID);
+            }
             else
             {
                 PlayerIdManager.SetUsername("UNKNOWN USER");
+                FusionLogger.Error($"Failed to initalize Oculus username with error: {msg.error}\n{msg.error.Message}");
             }
         }
         #endregion
