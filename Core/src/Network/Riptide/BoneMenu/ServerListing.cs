@@ -89,7 +89,7 @@ namespace LabFusion.Riptide.BoneMenu
             data.Port = _portToEnter;
             ServerListSaving.SaveServerList(data);
 
-            foreach (var category in _listingCategories)
+            foreach (var category in _listingCategories.ToArray())
             {
                 _category.Elements.Remove(category);
                 _listingCategories.Remove(category);

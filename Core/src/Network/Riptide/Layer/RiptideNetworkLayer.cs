@@ -16,7 +16,6 @@ using MelonLoader;
 using LabFusion.Riptide.BoneMenu;
 using LabFusion.Network;
 using LabFusion.Representation;
-using System.Web.Services.Description;
 using LabFusion.Preferences;
 using Riptide.Utils;
 using System.Reflection;
@@ -46,7 +45,8 @@ namespace LabFusion.Riptide
 #if DEBUG
             RiptideLogger.Initialize(MelonLogger.Msg, true);
 #endif
-            
+
+            Message.MaxPayloadSize = 30000;
             HookRiptideEvents();
             
             FusionLogger.Log("Initialized Riptide layer");
@@ -119,7 +119,7 @@ namespace LabFusion.Riptide
 
         private void CreateServerInfoMenu(MenuCategory category)
         {
-            _createServerElement = category.CreateFunctionElement("Start Server", Color.white, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host! Make sure you have done this!");
+            _createServerElement = category.CreateFunctionElement("Start P2P Server", Color.green, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host! Make sure you have done this!");
 
             var p2pServerSettingsMenu = category.CreateCategory("Riptide Server Settings", Color.cyan);
             _serverPortKeyboard = Keyboard.CreateKeyboard(p2pServerSettingsMenu, $"Server Port:\n{FusionPreferences.ClientSettings.ServerPort.GetValue()}", (port) => OnChangeServerPort(port));
@@ -183,7 +183,7 @@ namespace LabFusion.Riptide
         private ushort _serverPortToJoin = 7777;
         private void CreateP2PManualJoiningMenu(MenuCategory category)
         {
-            category.CreateFunctionElement("Join Server", Color.white, () => ClientManagement.P2PJoinServer(_serverCodeToJoin, _serverPortToJoin));
+            category.CreateFunctionElement("Join Server", Color.green, () => ClientManagement.P2PJoinServer(_serverCodeToJoin, _serverPortToJoin));
             _targetP2PCodeCategory = Keyboard.CreateKeyboard(category, "Server Code:", (code) => OnChangeJoinCode(code)).Category;
             _targetP2PPortCategory = Keyboard.CreateKeyboard(category, $"Server Port:\n{_serverPortToJoin}", (port) => OnChangeJoinPort(port)).Category;
         }
@@ -233,16 +233,19 @@ namespace LabFusion.Riptide
             if (CurrentClient.IsConnected && !CurrentServer.IsRunning)
             {
                 _createServerElement.SetName("Disconnect");
+                _createServerElement.SetColor(Color.red);
                 _fieldInfo.SetValue(_createServerElement, false);
             }
             else if (CurrentServer.IsRunning)
             {
                 _createServerElement.SetName("Stop Server");
+                _createServerElement.SetColor(Color.red);
                 _fieldInfo.SetValue(_createServerElement, false);
             }
             else if (!CurrentClient.IsConnected)
             {
                 _createServerElement.SetName("Start P2P Server");
+                _createServerElement.SetColor(Color.green);
                 _fieldInfo.SetValue(_createServerElement, true);
             }
         }

@@ -68,6 +68,8 @@ namespace LabFusion.Riptide
             PlayerIdManager.SetLongId(CurrentClient.Id);
 
             ConnectionSender.SendConnectionRequest();
+
+            InternalLayerHelpers.OnUpdateLobby();
         }
 
         public static void OnDisconnectFromServer(object sender, DisconnectedEventArgs args)
