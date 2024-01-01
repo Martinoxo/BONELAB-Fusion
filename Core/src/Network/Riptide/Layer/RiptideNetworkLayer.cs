@@ -19,6 +19,9 @@ using LabFusion.Representation;
 using LabFusion.Preferences;
 using Riptide.Utils;
 using System.Reflection;
+using LabFusion.Riptide.Voice;
+using LabFusion.Senders;
+using LabFusion.SDK.Gamemodes;
 
 namespace LabFusion.Riptide
 {
@@ -30,6 +33,9 @@ namespace LabFusion.Riptide
 
         internal override bool IsClient => CurrentClient.IsConnected;
         internal override bool IsServer => CurrentServer.IsRunning;
+
+        private readonly RiptideVoiceManager _voiceManager = new();
+        internal override IVoiceManager VoiceManager => _voiceManager;
 
         internal override string Title => "Riptide";
 
@@ -60,7 +66,7 @@ namespace LabFusion.Riptide
             CurrentServer.TimeoutTime = 30000;
         }
 
-        private static void HookRiptideEvents()
+        private void HookRiptideEvents()
         {
             // Riptide Hooks
             CurrentServer.ClientDisconnected += OnClientDisconnect;
@@ -70,6 +76,86 @@ namespace LabFusion.Riptide
             // Riptide Messages
             CurrentServer.MessageReceived += ServerManagement.OnMessageReceived;
             CurrentClient.MessageReceived += ClientManagement.OnMessageReceived;
+
+            // Add Server Hooks
+            MultiplayerHooking.OnPlayerJoin += OnPlayerJoin;
+            MultiplayerHooking.OnPlayerLeave += OnPlayerLeave;
+            MultiplayerHooking.OnDisconnect += OnDisconnect;
+        }
+
+        private void OnGamemodeChanged(Gamemode gamemode)
+        {
+            OnUpdateLobby();
+        }
+
+        private void OnPlayerJoin(PlayerId id)
+        {
+            if (!id.IsSelf)
+                VoiceManager.GetVoiceHandler(id);
+
+            OnUpdateLobby();
+        }
+
+        private void OnPlayerLeave(PlayerId id)
+        {
+            VoiceManager.Remove(id);
+
+            OnUpdateLobby();
+        }
+
+        private void OnDisconnect()
+        {
+            VoiceManager.RemoveAll();
+        }
+
+        // TODO: Add voice chat
+        internal override void OnVoiceChatUpdate()
+        {
+            if (NetworkInfo.HasServer)
+            {
+                if (!VoiceHelper.IsVoiceEnabled)
+                {
+                    if (Microphone.IsRecording(null))
+                    {
+                        UnityVoiceIntegration.StopMicrophone();
+                    }
+                    return;
+                }
+
+                if (!Microphone.IsRecording(UnityVoiceIntegration._microphone))
+                { 
+                    UnityVoiceIntegration.StartMicrophone();
+                }
+
+
+                byte[] voiceData = UnityVoiceIntegration.GetCompressedVoiceData();
+                if (voiceData != null)
+                {
+                    PlayerSender.SendPlayerVoiceChat(voiceData);
+                    FusionLogger.Log($"Sent voice data {voiceData.Length}");
+                } else
+                {
+                    FusionLogger.Log("No voice data to send");
+                }
+
+                // Update the manager
+                VoiceManager.Update();
+            }
+            else
+            {
+                // Disable voice recording
+                UnityVoiceIntegration.StopMicrophone();
+            }
+        }
+
+        internal override void OnVoiceBytesReceived(PlayerId id, byte[] bytes)
+        {
+            // If we are deafened, no need to deal with voice chat
+            if (VoiceHelper.IsDeafened)
+                return;
+
+            var handler = VoiceManager.GetVoiceHandler(id);
+            handler?.OnVoiceBytesReceived(bytes);
         }
 
         internal override void OnSetupBoneMenu(MenuCategory category)
@@ -78,6 +164,7 @@ namespace LabFusion.Riptide
             CreateMatchmakingMenu(category);
             BoneMenuCreator.CreateGamemodesMenu(category);
             BoneMenuCreator.CreateSettingsMenu(category);
+            CreateRiptideMenu(category);
             BoneMenuCreator.CreateNotificationsMenu(category);
 
 #if DEBUG
@@ -112,6 +199,56 @@ namespace LabFusion.Riptide
 
             // Server Listings
             ServerListingCategory.CreateServerListingCategory(_p2pMatchmakingCategory);
+        }
+
+        private FunctionElement _activeMicrophoneElement;
+        private MenuCategory _microphoneSettingsCategory;
+        private MenuCategory _microphoneCategory;
+        private List<FunctionElement> _microphoneElements = new List<FunctionElement>();
+        private void CreateRiptideMenu(MenuCategory category)
+        {
+            var riptideMenu = category.CreateCategory("Riptide Settings", Color.cyan);
+            
+            _microphoneSettingsCategory = riptideMenu.CreateCategory("Microphone Settings", Color.white);
+            _activeMicrophoneElement = _microphoneSettingsCategory.CreateFunctionElement($"Active Microphone: \n{Microphone.devices[0]}", Color.white, null);
+            _microphoneCategory = _microphoneSettingsCategory.CreateCategory("Change Microphone", Color.white);
+            _microphoneCategory.CreateFunctionElement("Refresh Microphones", Color.cyan, () => OnClickRefreshMicrophones());
+            foreach (var inputDevice in Microphone.devices)
+            {
+                var microphoneElement = _microphoneCategory.CreateFunctionElement(inputDevice, Color.white, () => OnSetMicrophone(inputDevice));
+                _microphoneElements.Add(microphoneElement);
+            }
+
+#if DEBUG
+            CreateRiptideDebugMenu(riptideMenu);
+#endif
+        }
+
+        private void OnClickRefreshMicrophones()
+        {
+            foreach (var element in _microphoneElements)
+            {
+                _microphoneCategory.Elements.Remove(element);
+                _microphoneElements.Remove(element);
+            }
+
+            foreach (var inputDevice in Microphone.devices)
+            {
+                var microphoneElement = _microphoneCategory.CreateFunctionElement(inputDevice, Color.white, () => OnSetMicrophone(inputDevice));
+                _microphoneElements.Add(microphoneElement);
+            }
+        }
+
+        private void OnSetMicrophone(string microphone)
+        {
+            _activeMicrophoneElement.SetName($"Active Microphone: \n{microphone}");
+
+            BoneLib.BoneMenu.MenuManager.SelectCategory(_microphoneSettingsCategory);
+        }
+
+        private void CreateRiptideDebugMenu(MenuCategory category)
+        {
+            var debugMenu = category.CreateCategory("Debug", Color.red);
         }
 
         private FunctionElement _createServerElement;

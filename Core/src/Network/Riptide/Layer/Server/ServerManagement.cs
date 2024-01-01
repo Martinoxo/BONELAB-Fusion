@@ -11,6 +11,7 @@ using LabFusion.Representation;
 using LabFusion.Senders;
 using Riptide;
 using Unity.Collections;
+using LabFusion.Riptide.Utilities;
 
 namespace LabFusion.Riptide
 {
@@ -64,7 +65,7 @@ namespace LabFusion.Riptide
         {
             args.Client.CanQualityDisconnect = false;
         }
-        
+
         public static void OnMessageReceived(object obj, MessageReceivedEventArgs args)
         {
             FusionMessageHandler.ReadMessage(args.Message.GetBytes(), true);

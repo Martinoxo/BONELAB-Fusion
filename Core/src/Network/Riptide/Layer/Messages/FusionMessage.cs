@@ -17,7 +17,7 @@ namespace LabFusion.Riptide.Messages
         {
             // Create new Riptide message
             Message fusionMessage = Message.Create(ConvertSendMode(channel), MessageTypes.FusionMessage);
-            
+
             // Add byte[] after converting Fusion message
             fusionMessage.AddBytes(message.ToByteArray());
 

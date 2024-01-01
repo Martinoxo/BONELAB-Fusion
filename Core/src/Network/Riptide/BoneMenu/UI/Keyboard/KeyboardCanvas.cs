@@ -320,6 +320,11 @@ namespace LabFusion.Riptide.BoneMenu
                 return;
             }
 
+            if (isCaps)
+                key = key.ToUpper();
+            else
+                key = key.ToLower();
+
             DisplayTMP.SetText(DisplayTMP.text += key);
         }
 

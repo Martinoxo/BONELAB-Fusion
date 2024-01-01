@@ -70,9 +70,6 @@ namespace LabFusion.Riptide.BoneMenu
         {
             public static void Postfix(UIManager __instance, MenuCategory category)
             {
-#if DEBUG
-                FusionLogger.Log("Category Update Patch");
-#endif
                 foreach (var obj in Keyboards)
                 {
                     if (obj.Category == category)
@@ -128,9 +125,6 @@ namespace LabFusion.Riptide.BoneMenu
         {
             public static void Postfix(MenuCategory category)
             {
-#if  DEBUG
-                FusionLogger.Log("Select Category Patch");          
-#endif
                 foreach (var keyboard in Keyboards)
                 {
                     if (keyboard.KeyboardObject == null)

@@ -31,13 +31,13 @@ namespace LabFusion.Riptide.Utilities
                 }
                 else
                 {
-                    Core.Initialize("5088709007839657");
+                    Oculus.Platform.Core.Initialize("5088709007839657");
                     Users.GetLoggedInUser().OnComplete((Message<User>.Callback)GetLoggedInUserCallback);
                 }
             }
             else
             {
-                Core.Initialize("4215734068529064");
+                Oculus.Platform.Core.Initialize("4215734068529064");
                 Users.GetLoggedInUser().OnComplete((Message<User>.Callback)GetLoggedInUserCallback);
             }
         }
