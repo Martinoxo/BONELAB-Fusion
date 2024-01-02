@@ -99,7 +99,7 @@ namespace LabFusion.Riptide.BoneMenu
                             keyboardCanvas.SetupReferences();
 
                             obj.KeyboardObject.transform.parent = __instance.MainPage.transform;
-                            obj.KeyboardObject.transform.localPosition = new Vector3 (0, 0, 0);
+                            obj.KeyboardObject.transform.localPosition = new Vector3 (0, 0, 40);
                             obj.KeyboardObject.transform.localRotation = Quaternion.identity;
                             obj.KeyboardObject.transform.localScale = new Vector3 (180, 180, 180);
                         } else

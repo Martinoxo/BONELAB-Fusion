@@ -29,24 +29,18 @@ namespace LabFusion.Riptide.Patching
             if (NetworkLayerDeterminer.LoadedTitle != "Riptide")
                 return;
 
-#if DEBUG
-            FusionLogger.Log("Modifying Player Menu");
-#endif
-
             Type type = typeof(BoneMenuCreator);
             FieldInfo fieldInfo = type.GetField("_playerListCategory", BindingFlags.NonPublic | BindingFlags.Static);
             MenuCategory playerListCategory = (MenuCategory)fieldInfo.GetValue(null);
 
             if (playerListCategory == null)
             {
-                FusionLogger.Log("PlayerList Category was null!");
                 return;
             }
 
             List<MenuCategory> playerMenus = playerListCategory.Elements.Where(x => x is MenuCategory).Cast<MenuCategory>().ToList();
             if (playerMenus == null || playerMenus.Count == 0)
             {
-                FusionLogger.Log("PlayerMenus was null or empty!");
                 return;
             }
 
