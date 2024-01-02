@@ -116,9 +116,6 @@ namespace LabFusion.Preferences
             // Gamemode settings
             public static FusionPref<bool> GamemodeMusic { get; internal set; }
             public static FusionPref<bool> GamemodeLateJoining { get; internal set; }
-            
-            // TideFusion
-            public static FusionPref<ushort> ServerPort { get; internal set; }
         }
 
         internal static ServerSettings LocalServerSettings;
@@ -177,7 +174,6 @@ namespace LabFusion.Preferences
         {
             // Create preferences
             prefCategory = MelonPreferences.CreateCategory("BONELAB Fusion");
-            MelonPreferences_Category tideCategory = MelonPreferences.CreateCategory("BONELAB TideFusion");
 
             // Server settings
             LocalServerSettings = ServerSettings.CreateMelonPrefs();
@@ -203,9 +199,6 @@ namespace LabFusion.Preferences
             // Gamemodes
             ClientSettings.GamemodeMusic = new FusionPref<bool>(prefCategory, "Gamemode Music", true, PrefUpdateMode.IGNORE);
             ClientSettings.GamemodeLateJoining = new FusionPref<bool>(prefCategory, "Gamemode Late Joining", true, PrefUpdateMode.IGNORE);
-            
-            // TideFusion
-            ClientSettings.ServerPort = new FusionPref<ushort>(tideCategory, "Server Port", 7777, PrefUpdateMode.IGNORE);
 
             // Save category
             prefCategory.SaveToFile(false);

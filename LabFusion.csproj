@@ -470,6 +470,7 @@
     <Compile Include="Core\src\Network\Riptide\Layer\Voice\RiptideVoiceManager.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\Voice\UnityVoiceIntegration.cs" />
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\PlayerListPatches.cs" />
+    <Compile Include="Core\src\Network\Riptide\Preferences\RiptidePreferences.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\ServerListSaving.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\MessageTypes.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\ServerTypes.cs" />

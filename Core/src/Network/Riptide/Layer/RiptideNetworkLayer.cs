@@ -22,6 +22,7 @@ using System.Reflection;
 using LabFusion.Riptide.Voice;
 using LabFusion.Senders;
 using LabFusion.SDK.Gamemodes;
+using LabFusion.Riptide.Preferences;
 
 namespace LabFusion.Riptide
 {
@@ -51,6 +52,7 @@ namespace LabFusion.Riptide
 #if DEBUG
             RiptideLogger.Initialize(MelonLogger.Msg, true);
 #endif
+            RiptidePreferences.OnInitializePreferences();
 
             Message.MaxPayloadSize = 30000;
             HookRiptideEvents();
@@ -261,7 +263,7 @@ namespace LabFusion.Riptide
             _createServerElement = category.CreateFunctionElement("Start P2P Server", Color.green, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host! Make sure you have done this!");
 
             var p2pServerSettingsMenu = category.CreateCategory("Riptide Server Settings", Color.cyan);
-            _serverPortKeyboard = Keyboard.CreateKeyboard(p2pServerSettingsMenu, $"Server Port:\n{FusionPreferences.ClientSettings.ServerPort.GetValue()}", (port) => OnChangeServerPort(port));
+            _serverPortKeyboard = Keyboard.CreateKeyboard(p2pServerSettingsMenu, $"Server Port:\n{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}", (port) => OnChangeServerPort(port));
 
             category.CreateFunctionElement("Display Server Code", Color.white, () => OnDislayServerCode());
 
@@ -312,8 +314,8 @@ namespace LabFusion.Riptide
                 return;
             }
 
-            FusionPreferences.ClientSettings.ServerPort.SetValue(result);
-            _serverPortKeyboard.Category.SetName($"Server Port:\n{FusionPreferences.ClientSettings.ServerPort.GetValue()}");
+            RiptidePreferences.LocalServerSettings.ServerPort.SetValue(result);
+            _serverPortKeyboard.Category.SetName($"Server Port:\n{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}");
         }
 
         private MenuCategory _targetP2PCodeCategory;

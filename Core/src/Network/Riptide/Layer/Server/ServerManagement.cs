@@ -12,6 +12,7 @@ using LabFusion.Senders;
 using Riptide;
 using Unity.Collections;
 using LabFusion.Riptide.Utilities;
+using LabFusion.Riptide.Preferences;
 
 namespace LabFusion.Riptide
 {
@@ -24,11 +25,11 @@ namespace LabFusion.Riptide
             if (CurrentServer.IsRunning)
                 CurrentServer.Stop();
 
-            CurrentServer.Start(FusionPreferences.ClientSettings.ServerPort.GetValue(), 256, 0, false);
+            CurrentServer.Start(RiptidePreferences.LocalServerSettings.ServerPort.GetValue(), 256, 0, false);
 
             ClientManagement.CurrentClient.Connected += OnConnectToP2PServer;
             ClientManagement.CurrentClient.Connect(
-                $"127.0.0.1:{FusionPreferences.ClientSettings.ServerPort.GetValue()}", 5, 0, null, false);
+                $"127.0.0.1:{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}", 5, 0, null, false);
         }
 
         private static void OnConnectToP2PServer(object sender, EventArgs e)
