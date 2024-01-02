@@ -37,29 +37,30 @@ namespace LabFusion.Riptide.Voice
             StartMicrophone();
         }
 
-        public static byte[] GetCompressedVoiceData()
+        public static byte[] GetVoiceData()
         {
             // Get data from microphone into our buffer
-            int microphonePosition = Microphone.GetPosition(null);
+            int microphonePosition = Microphone.GetPosition(_microphone);
 
-            byte[] data = null;
             if (microphonePosition < position)
             {
                 // Microphone has looped, process remaining data
-                data = ProcessData(position, microphoneInput.samples - position);
+                byte[] data = ProcessData(position, microphoneInput.samples - position);
                 position = 0;
+                return data;
             }
             if (microphonePosition > position)
             {
                 // Process new data
                 if (microphonePosition - position > 0)
                 {
-                    data = ProcessData(position, microphonePosition - position);
+                    byte[] data = ProcessData(position, microphonePosition - position);
                     position = microphonePosition;
+                    return data;
                 }
             }
 
-            return data;
+            return null;
         }
 
         private static byte[] ProcessData(int start, int length)

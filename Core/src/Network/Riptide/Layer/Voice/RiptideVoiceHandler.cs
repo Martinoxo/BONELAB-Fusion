@@ -18,7 +18,7 @@ namespace LabFusion.Riptide.Voice
 
         private readonly MemoryStream _compressedVoiceStream = new();
         private readonly MemoryStream _decompressedVoiceStream = new();
-        private readonly Queue<float> _streamingReadQueue = new();
+        private readonly Queue<byte[]> _streamingReadQueue = new();
 
         public RiptideVoiceHandler(PlayerId id)
         {
@@ -67,17 +67,9 @@ namespace LabFusion.Riptide.Voice
                 FusionLogger.Log($"No voice data to handle");
                 return;
             }
-            FusionLogger.Log($"Handling voice data: {bytes[0]}{bytes[1]}{bytes[2]}{bytes[3]}{bytes[4]}{bytes[5]}");
 
-            // Convert byte array to float array
-            float[] floatData = new float[bytes.Length / 4];
-            Buffer.BlockCopy(bytes, 0, floatData, 0, bytes.Length);
-
-            // Add the data to the streamingReadQueue
-            foreach (var data in floatData)
-            {
-                _streamingReadQueue.Enqueue(data);
-            }
+            bytes = UnityVoiceIntegration.Decompress(bytes);
+            _streamingReadQueue.Enqueue(bytes);
         }
 
         private float GetVoiceMultiplier()
@@ -97,15 +89,16 @@ namespace LabFusion.Riptide.Voice
         {
             float mult = GetVoiceMultiplier();
 
-            for (int i = 0; i < data.Length; i++)
+            // Check if there is any voice data in the queue
+            if (_streamingReadQueue.Count > 0)
             {
-                if (_streamingReadQueue.Count > 0)
+                // Dequeue the voice data
+                byte[] voiceData = _streamingReadQueue.Dequeue();
+
+                // Convert the voice data to float and add it to the data array
+                for (int i = 0; i < voiceData.Length / 2; i++)
                 {
-                    data[i] = _streamingReadQueue.Dequeue() * mult;
-                }
-                else
-                {
-                    data[i] = 0.0f;  // Nothing in the queue means we should just play silence
+                    data[i] = (BitConverter.ToInt16(voiceData, i * 2) / 32767f) * mult;
                 }
             }
         }

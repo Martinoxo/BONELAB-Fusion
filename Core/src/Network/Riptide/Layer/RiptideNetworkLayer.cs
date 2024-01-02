@@ -128,11 +128,11 @@ namespace LabFusion.Riptide
                 }
 
 
-                byte[] voiceData = UnityVoiceIntegration.GetCompressedVoiceData();
+                byte[] voiceData = UnityVoiceIntegration.GetVoiceData();
                 if (voiceData != null)
                 {
+                    voiceData = UnityVoiceIntegration.Compress(voiceData);
                     PlayerSender.SendPlayerVoiceChat(voiceData);
-                    FusionLogger.Log($"Sent voice data {voiceData.Length}");
                 } else
                 {
                     FusionLogger.Log("No voice data to send");
