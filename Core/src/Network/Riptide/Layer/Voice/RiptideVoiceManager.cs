@@ -21,5 +21,8 @@ namespace LabFusion.Riptide.Voice
             VoiceHandlers.Add(newIdentifier);
             return newIdentifier;
         }
+
+        public override bool CanHear => false;
+        public override bool CanTalk => false;
     }
 }

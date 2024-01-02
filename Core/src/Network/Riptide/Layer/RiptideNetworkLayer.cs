@@ -106,10 +106,12 @@ namespace LabFusion.Riptide
         private void OnDisconnect()
         {
             VoiceManager.RemoveAll();
+
+            OnUpdateLobby();
         }
 
         // TODO: Add voice chat
-        internal override void OnVoiceChatUpdate()
+        /*internal override void OnVoiceChatUpdate()
         {
             if (NetworkInfo.HasServer)
             {
@@ -156,7 +158,7 @@ namespace LabFusion.Riptide
 
             var handler = VoiceManager.GetVoiceHandler(id);
             handler?.OnVoiceBytesReceived(bytes);
-        }
+        }*/
 
         internal override void OnSetupBoneMenu(MenuCategory category)
         {
