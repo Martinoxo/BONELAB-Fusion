@@ -1,7 +1,7 @@
-# BONELAB Fusion
-Having been in development for 5 months, the long awaited multiplayer mod FUSION for BONELAB is here.<br>
+# BONELAB TideFusion
+Even though the source code was lost, TideFusion has been rewritten from the ground up!
 
-![](https://i.imgur.com/1ZpMfei.png)
+## TIDEFUSION IS AN UNOFFICIAL FORK OF FUSION, AND IS NOT AFFILIATED WITH LAKATRAZZ OR ANY OTHER FUSION DEVELOPERS. DO NOT BUG THEM FOR RIPTIDE SPECIFIC ISSUES.
 
 # Installation
 ## How To Install (PCVR)
@@ -9,26 +9,26 @@ Having been in development for 5 months, the long awaited multiplayer mod FUSION
 2. Install MelonLoader (0.5.7 required).
 3. Install BoneLib.
 4. Download Fusion and drag the LabFusion.dll file into your MelonLoader Mods folder. This is not to be confused with the SLZ official mods folder.
-5. Drag the LabFusionUpdater.dll file into your MelonLoader Plugins folder. This will automatically update the mod for you.
-5. Make sure you have Steam installed and running.
+5. Drag the RiptideNetworking.dll file into your MelonLoader Plugins folder.
+5. Drag the netstandard.dll file into your MelonLoader Plugins folder.
 6. You're done!
 
 ## How To Install (Quest)
 1. Make sure you are on BONELAB Patch 3. This is the "public beta" branch.
 2. Install LemonLoader (latest version required).
 3. Install BoneLib.
-4. Download Fusion and drag the LabFusion.dll file into your Mods folder. Ignore the LabFusionUpdater.dll file, it does not work on Quest.
-5. Download FusionHelper on your PC ([available here](https://github.com/Lakatrazz/Fusion-Helper/releases/latest)). This will wirelessly connect to your Quest.
-     - Note that the PC does not need to run BONELAB, or have good specifications.
-6. Run Steam and FusionHelper on your PC.
-     - Make sure to run these programs every time you play, and that your PC and Quest are on the same network.
-     - Both programs are required as they handle networking the game between you and your friends.
+4. Download Fusion and drag the LabFusion.dll file into your Mods folder.
+5. Drag the RiptideNetworking.dll file into your Plugins folder.
+5. Drag the netstandard.dll file into your Plugins folder.
 7. Open BONELAB on your Quest.
 8. You're done!
+
+## If you want to use the STEAM layer in TideFusion, please refer to the official Fusion installation guide
 
 ## Video Tutorials
 - PCVR: https://youtu.be/wz-ERSaz8GU
 - Quest: https://youtu.be/3dB_3g6CM9Q
+### These videos are not meant for TideFusion, but they do help get you most of the way there ^
 
 # About
 ## How to Use the Mod

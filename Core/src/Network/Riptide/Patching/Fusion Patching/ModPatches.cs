@@ -3,6 +3,7 @@ using LabFusion.BoneMenu;
 using LabFusion.Network;
 using LabFusion.Patching;
 using LabFusion.Preferences;
+using LabFusion.Riptide.Utilities;
 using LabFusion.Utilities;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,15 @@ namespace LabFusion.Riptide.Patching
             FusionPreferences.OnCreateBoneMenu();
 
             return false;
+        }
+
+        // Load APIs
+        [HarmonyPrefix]
+        [HarmonyPatch(nameof(FusionMod.OnInitializeMelon))]
+        public static void LoadAPIs()
+        {
+            NetstandardLoader.Load();
+            RiptideNetworkingLoader.Load();
         }
     }
 }

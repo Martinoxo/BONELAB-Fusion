@@ -472,6 +472,9 @@
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\ModPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\PlayerListPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Preferences\RiptidePreferences.cs" />
+    <Compile Include="Core\src\Network\Riptide\Utilites\Data\ResourcePaths.cs" />
+    <Compile Include="Core\src\Network\Riptide\Utilites\Data\netstandardLoader.cs" />
+    <Compile Include="Core\src\Network\Riptide\Utilites\Data\RiptideNetworkingLoader.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\ServerListSaving.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\MessageTypes.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\ServerTypes.cs" />
@@ -1468,6 +1471,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Core\src\Network\Riptide\Resources\lib\netstandard.dll" />
+    <EmbeddedResource Include="Core\src\Network\Riptide\Resources\lib\RiptideNetworking.dll" />
     <EmbeddedResource Include="Core\resources\text\raw_changelog.txt" />
     <EmbeddedResource Include="Core\resources\text\credits\raw_credits_01.txt" />
     <EmbeddedResource Include="Core\resources\text\credits\raw_credits_02.txt" />

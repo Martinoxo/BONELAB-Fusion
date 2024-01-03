@@ -24,6 +24,7 @@ using UnityEngine;
 
 using System.Linq;
 using BoneLib;
+using LabFusion.Riptide.Utilities;
 
 namespace LabFusion
 {

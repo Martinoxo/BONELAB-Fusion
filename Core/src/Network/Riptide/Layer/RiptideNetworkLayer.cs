@@ -46,29 +46,6 @@ namespace LabFusion.Riptide
 
         internal override bool CheckValidation()
         {
-            var riptideAssembly = MelonLoader.MelonAssembly.LoadedAssemblies.Where(x => x.Assembly.GetName().Name == "RiptideNetworking").FirstOrDefault().Assembly;
-
-            if (riptideAssembly.GetName().Version < RiptideNetworkingVersion)
-            {
-                FusionLogger.Log($"RiptideNetworking.dll in your Plguins folder is too old! Please update to the latest version!");
-
-                LabFusion.Utilities.FusionSceneManager.HookOnDelayedLevelLoad(() =>
-                {
-                    FusionNotifier.Send(new FusionNotification()
-                    {
-                        isMenuItem = false,
-                        isPopup = true,
-                        showTitleOnPopup = true,
-                        title = "Old Plugin Version!",
-                        message = "RiptideNetworking.dll in your Plguins folder is too old! Please update to the latest version!",
-                        popupLength = 5f,
-                        type = NotificationType.ERROR,
-                    });
-                });
-
-                return false;
-            }
-
             return true;
         }
 
