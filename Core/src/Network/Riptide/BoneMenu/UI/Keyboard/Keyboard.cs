@@ -12,6 +12,7 @@ using LabFusion.Utilities;
 using System.Configuration;
 using LabFusion.UI;
 using SLZ.Props;
+using LabFusion.Riptide.Utilities;
 
 namespace LabFusion.Riptide.BoneMenu
 {
@@ -22,8 +23,6 @@ namespace LabFusion.Riptide.BoneMenu
         public Action<string> OnEnter;
         public MenuCategory Category;
         public GameObject KeyboardObject;
-
-        private static UIManager UiManagerInstance;
 
         public static Keyboard CreateKeyboard(BoneLib.BoneMenu.Elements.MenuCategory category, string name, Action<string> onEnter)
         {
@@ -40,7 +39,7 @@ namespace LabFusion.Riptide.BoneMenu
 
             keyboard.OnEnter = onEnter;
 
-            GameObject keyboardObject = GameObject.Instantiate(FusionContentLoader.KeyboardPrefab);
+            GameObject keyboardObject = GameObject.Instantiate(TideContentLoader.KeyboardPrefab);
             keyboardObject.SetActive(true);
             if (keyboardObject == null )
             {
@@ -80,7 +79,7 @@ namespace LabFusion.Riptide.BoneMenu
 
                         if (obj.KeyboardObject == null)
                         {
-                            obj.KeyboardObject = GameObject.Instantiate(FusionContentLoader.KeyboardPrefab);
+                            obj.KeyboardObject = GameObject.Instantiate(TideContentLoader.KeyboardPrefab);
                             obj.KeyboardObject.SetActive(true);
                             if (obj.KeyboardObject == null)
                             {

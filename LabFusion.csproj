@@ -469,6 +469,7 @@
     <Compile Include="Core\src\Network\Riptide\Layer\Voice\RiptideVoiceHandler.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\Voice\RiptideVoiceManager.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\Voice\UnityVoiceIntegration.cs" />
+    <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\BundleLoadingPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\ModPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\PlayerListPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Preferences\RiptidePreferences.cs" />
@@ -476,6 +477,7 @@
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\netstandardLoader.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\RiptideNetworkingLoader.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\ServerListSaving.cs" />
+    <Compile Include="Core\src\Network\Riptide\Utilites\Data\TideContentLoader.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\MessageTypes.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\ServerTypes.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Internal\IPExtensions.cs" />
@@ -1471,8 +1473,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Core\src\Network\Riptide\Resources\lib\netstandard.dll" />
-    <EmbeddedResource Include="Core\src\Network\Riptide\Resources\lib\RiptideNetworking.dll" />
+    <EmbeddedResource Include="Core\src\Network\Riptide\resources\lib\netstandard.dll" />
+    <EmbeddedResource Include="Core\src\Network\Riptide\resources\lib\RiptideNetworking.dll" />
     <EmbeddedResource Include="Core\resources\text\raw_changelog.txt" />
     <EmbeddedResource Include="Core\resources\text\credits\raw_credits_01.txt" />
     <EmbeddedResource Include="Core\resources\text\credits\raw_credits_02.txt" />
@@ -1496,6 +1498,8 @@
     <EmbeddedResource Include="Core\resources\bundles\Android\achievement_bundle.fusion" />
     <EmbeddedResource Include="Core\resources\bundles\Android\content_bundle.fusion" />
     <EmbeddedResource Include="Core\resources\bundles\Android\item_bundle.fusion" />
+    <EmbeddedResource Include="Core\resources\bundles\Android\tidebundle.fusion" />
+    <EmbeddedResource Include="Core\resources\bundles\StandaloneWindows64\tidebundle.fusion" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
