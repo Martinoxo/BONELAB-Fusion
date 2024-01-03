@@ -40,8 +40,6 @@ namespace LabFusion.Riptide
 
         internal override string Title => "Riptide";
 
-        private static readonly Version RiptideNetworkingVersion = new Version(2, 1, 2, 0);
-
         internal override bool CheckSupported() => true;
 
         internal override bool CheckValidation()
@@ -88,11 +86,6 @@ namespace LabFusion.Riptide
             MultiplayerHooking.OnPlayerJoin += OnPlayerJoin;
             MultiplayerHooking.OnPlayerLeave += OnPlayerLeave;
             MultiplayerHooking.OnDisconnect += OnDisconnect;
-        }
-
-        private void OnGamemodeChanged(Gamemode gamemode)
-        {
-            OnUpdateLobby();
         }
 
         private void OnPlayerJoin(PlayerId id)

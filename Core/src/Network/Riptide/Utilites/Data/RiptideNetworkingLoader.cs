@@ -1,5 +1,6 @@
 ﻿using LabFusion.Data;
 using LabFusion.Utilities;
+using MelonLoader;
 using System;
 using System.Collections.Generic;
 using System.IO;

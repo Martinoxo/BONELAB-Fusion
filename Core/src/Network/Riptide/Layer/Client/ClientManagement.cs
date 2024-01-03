@@ -74,7 +74,7 @@ namespace LabFusion.Riptide
 
         public static void OnDisconnectFromServer(object sender, DisconnectedEventArgs args)
         {
-            InternalServerHelpers.OnDisconnect(GetDisconnectReason(args.Reason));
+            InternalServerHelpers.OnDisconnect();
         }
 
         private static string GetDisconnectReason(DisconnectReason disonnectReason)
