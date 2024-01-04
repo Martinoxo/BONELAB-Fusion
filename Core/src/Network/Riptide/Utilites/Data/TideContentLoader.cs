@@ -1,4 +1,6 @@
-﻿using LabFusion.Utilities;
+﻿using BoneLib;
+using LabFusion.Data;
+using LabFusion.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,13 +12,40 @@ namespace LabFusion.Riptide.Utilities
 {
     public static class TideContentLoader
     {
+        public static T LoadPersistentAsset<T>(this AssetBundle bundle, string name) where T : UnityEngine.Object
+        {
+            var asset = bundle.LoadAsset(name);
+
+            if (asset != null)
+            {
+                asset.hideFlags = HideFlags.DontUnloadUnusedAsset;
+                return asset.TryCast<T>();
+            }
+
+            return null;
+        }
+
+        public static AssetBundle LoadAssetBundle(string name)
+        {
+            // Android
+            if (HelperMethods.IsAndroid())
+            {
+                return EmbeddedAssetBundle.LoadFromAssembly(FusionMod.FusionAssembly, ResourcePaths.AndroidBundlePrefix + name);
+            }
+            // Windows
+            else
+            {
+                return EmbeddedAssetBundle.LoadFromAssembly(FusionMod.FusionAssembly, ResourcePaths.WindowsBundlePrefix + name);
+            }
+        }
+
         public static AssetBundle TideBundle { get; private set; }
 
         public static GameObject KeyboardPrefab { get; private set; }
 
         public static void OnBundleLoad()
         {
-            TideBundle = FusionBundleLoader.LoadAssetBundle(ResourcePaths.TideBundle);
+            TideBundle = LoadAssetBundle(ResourcePaths.TideBundle);
 
             if (TideBundle != null)
             {

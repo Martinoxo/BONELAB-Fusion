@@ -19,14 +19,26 @@ namespace LabFusion.Riptide
     {
         public static Client CurrentClient = new();
 
+        public static bool IsConnecting { get; private set; }
+
         public static void P2PJoinServer(string code, ushort port)
         {
-            if (CurrentClient.IsConnecting)
+            if (IsConnecting)
+            {
+                if (ClientManagement.IsConnecting)
+                {
+                    FusionNotifier.Send(new FusionNotification()
+                    {
+                        showTitleOnPopup = false,
+                        message = $"Already connecting to a server!",
+                        isMenuItem = false,
+                        isPopup = true,
+                        popupLength = 5f,
+                        type = NotificationType.WARNING
+                    });
+                }
                 return;
-
-            if (CurrentClient.IsPending)
-                return;
-
+            }
 
             if (string.IsNullOrEmpty(code))
             {
@@ -50,17 +62,37 @@ namespace LabFusion.Riptide
             if (CurrentClient.IsConnected)
                 CurrentClient.Disconnect();
 
+            if (!uint.TryParse(code, out uint codeInt))
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    showTitleOnPopup = false,
+                    message = $"Invalid server code!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
+                return;
+            }
+
             if (!code.Contains("."))
-                code = IPExtensions.DecodeIpAddress(code);
+                code = IPExtensions.DecodeIpAddress(codeInt);
+
+            
 
             CurrentClient.Connected += OnConnectToP2PServer;
 
             CurrentClient.Connect($"{code}:{port}", 5, 0, null, false);
+
+            IsConnecting = true;
         }
 
         private static void OnConnectToP2PServer(object sender, EventArgs e)
         {
             CurrentClient.Connected -= OnConnectToP2PServer;
+
+            IsConnecting = false;
 
             CurrentClient.TimeoutTime = 30000;
             CurrentClient.Connection.CanQualityDisconnect = false;
@@ -72,34 +104,25 @@ namespace LabFusion.Riptide
             InternalLayerHelpers.OnUpdateLobby();
         }
 
+        public static void OnConnectionFail(object sender, ConnectionFailedEventArgs e)
+        {
+            IsConnecting = false;
+
+            FusionNotifier.Send(new FusionNotification()
+            {
+                title = "Connection Failed",
+                showTitleOnPopup = true,
+                message = $"Failed to connect to server! Is the server running?",
+                isMenuItem = false,
+                isPopup = true,
+                popupLength = 5f,
+                type = NotificationType.ERROR
+            });
+        }
+
         public static void OnDisconnectFromServer(object sender, DisconnectedEventArgs args)
         {
             InternalServerHelpers.OnDisconnect();
-        }
-
-        private static string GetDisconnectReason(DisconnectReason disonnectReason)
-        {
-            switch (disonnectReason)
-            {
-                case (DisconnectReason.ConnectionRejected):
-                    return "Rejected from connecting";
-                case (DisconnectReason.Disconnected):
-                    return "Disconnected from server";
-                case (DisconnectReason.PoorConnection):
-                    return "Poor connection to server";
-                case (DisconnectReason.TransportError):
-                    return "Transport mismatch";
-                case (DisconnectReason.Kicked):
-                    return "Kicked from server";
-                case (DisconnectReason.TimedOut):
-                    return "Timed out from server";
-                case (DisconnectReason.ServerStopped):
-                    return "Server stopped";
-                case (DisconnectReason.NeverConnected):
-                    return "Never connected to server";
-                default:
-                    return "Unkown disconnect reason";
-            }
         }
         
         public static void OnMessageReceived(object obj, MessageReceivedEventArgs args)

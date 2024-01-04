@@ -11,6 +11,9 @@ namespace LabFusion.Riptide.Utilities
         internal const string RiptideNetworkingPath = "LabFusion.Core.src.Network.Riptide.resources.lib.RiptideNetworking.dll";
         internal const string netstandardPath = "LabFusion.Core.src.Network.Riptide.resources.lib.netstandard.dll";
 
+        public const string WindowsBundlePrefix = "LabFusion.Core.src.Network.Riptide.resources.bundles.StandaloneWindows64.";
+        public const string AndroidBundlePrefix = "LabFusion.Core.src.Network.Riptide.resources.bundles.Android.";
+
         // Bundle
         public const string TideBundle = "tidebundle.fusion";
 

@@ -9,8 +9,6 @@ Even though the source code was lost, TideFusion has been rewritten from the gro
 2. Install MelonLoader (0.5.7 required).
 3. Install BoneLib.
 4. Download Fusion and drag the LabFusion.dll file into your MelonLoader Mods folder. This is not to be confused with the SLZ official mods folder.
-5. Drag the RiptideNetworking.dll file into your MelonLoader Plugins folder.
-5. Drag the netstandard.dll file into your MelonLoader Plugins folder.
 6. You're done!
 
 ## How To Install (Quest)
@@ -18,8 +16,6 @@ Even though the source code was lost, TideFusion has been rewritten from the gro
 2. Install LemonLoader (latest version required).
 3. Install BoneLib.
 4. Download Fusion and drag the LabFusion.dll file into your Mods folder.
-5. Drag the RiptideNetworking.dll file into your Plugins folder.
-5. Drag the netstandard.dll file into your Plugins folder.
 7. Open BONELAB on your Quest.
 8. You're done!
 

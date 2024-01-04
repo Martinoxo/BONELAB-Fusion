@@ -13,6 +13,7 @@ using Riptide;
 using Unity.Collections;
 using LabFusion.Riptide.Utilities;
 using LabFusion.Riptide.Preferences;
+using LabFusion.Utilities;
 
 namespace LabFusion.Riptide
 {
@@ -22,6 +23,20 @@ namespace LabFusion.Riptide
 
         public static void StartServer()
         {
+            if (ClientManagement.IsConnecting)
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    showTitleOnPopup = false,
+                    message = $"Cannot start server whilst connecting to a server! Either wait for the connection to fail, or stop connecting to a server!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.WARNING
+                });
+                return;
+            }
+
             if (CurrentServer.IsRunning)
                 CurrentServer.Stop();
 

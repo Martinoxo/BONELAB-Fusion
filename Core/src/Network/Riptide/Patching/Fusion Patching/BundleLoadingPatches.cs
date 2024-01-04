@@ -16,8 +16,6 @@ namespace LabFusion.Riptide.Utilities
         [HarmonyPatch(nameof(FusionBundleLoader.OnBundleLoad))]
         public static void LoadTideBundle()
         {
-            FusionLogger.Log("Loading Tide bundle");
-
             TideContentLoader.OnBundleLoad();
         }
     }

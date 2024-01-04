@@ -472,6 +472,7 @@
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\BundleLoadingPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\ModPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\PlayerListPatches.cs" />
+    <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\SceneManagerPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Preferences\RiptidePreferences.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\ResourcePaths.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\netstandardLoader.cs" />
@@ -1498,8 +1499,8 @@
     <EmbeddedResource Include="Core\resources\bundles\Android\achievement_bundle.fusion" />
     <EmbeddedResource Include="Core\resources\bundles\Android\content_bundle.fusion" />
     <EmbeddedResource Include="Core\resources\bundles\Android\item_bundle.fusion" />
-    <EmbeddedResource Include="Core\resources\bundles\Android\tidebundle.fusion" />
-    <EmbeddedResource Include="Core\resources\bundles\StandaloneWindows64\tidebundle.fusion" />
+    <EmbeddedResource Include="Core\src\Network\Riptide\resources\bundles\Android\tidebundle.fusion" />
+    <EmbeddedResource Include="Core\src\Network\Riptide\resources\bundles\StandaloneWindows64\tidebundle.fusion" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

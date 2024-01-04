@@ -77,6 +77,7 @@ namespace LabFusion.Riptide
             CurrentServer.ClientDisconnected += OnClientDisconnect;
             CurrentServer.ClientConnected += OnClientConnect;
             CurrentClient.Disconnected += OnDisconnectFromServer;
+            CurrentClient.ConnectionFailed += OnConnectionFail;
 
             // Riptide Messages
             CurrentServer.MessageReceived += ServerManagement.OnMessageReceived;
@@ -166,7 +167,6 @@ namespace LabFusion.Riptide
             CreateMatchmakingMenu(category);
             BoneMenuCreator.CreateGamemodesMenu(category);
             BoneMenuCreator.CreateSettingsMenu(category);
-            CreateRiptideMenu(category);
             BoneMenuCreator.CreateNotificationsMenu(category);
 
 #if DEBUG
