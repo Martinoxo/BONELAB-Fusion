@@ -23,6 +23,10 @@ using LabFusion.Riptide.Voice;
 using LabFusion.Senders;
 using LabFusion.SDK.Gamemodes;
 using LabFusion.Riptide.Preferences;
+using LabFusion.Grabbables;
+using SLZ.Interaction;
+using SLZ.Marrow.Data;
+using SLZ.Props;
 
 namespace LabFusion.Riptide
 {
@@ -258,7 +262,7 @@ namespace LabFusion.Riptide
 
         private void CreateServerInfoMenu(MenuCategory category)
         {
-            _createServerElement = category.CreateFunctionElement("Start P2P Server", Color.green, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host! Make sure you have done this!");
+            _createServerElement = category.CreateFunctionElement("Start P2P Server", Color.green, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host!");
 
             var p2pServerSettingsMenu = category.CreateCategory("Riptide Server Settings", Color.cyan);
             _serverPortKeyboard = Keyboard.CreateKeyboard(p2pServerSettingsMenu, $"Server Port:\n{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}", (port) => OnChangeServerPort(port));

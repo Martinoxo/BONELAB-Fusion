@@ -191,7 +191,6 @@ namespace LabFusion.Network
                     byte[] voiceData = SteamUser.ReadVoiceDataBytes();
 
                     PlayerSender.SendPlayerVoiceChat(voiceData);
-                    FusionLogger.Log($"Sent void data: {voiceData?.Length}");
                 }
 
                 // Update the manager

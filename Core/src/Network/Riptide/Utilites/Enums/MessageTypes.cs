@@ -10,6 +10,5 @@ namespace LabFusion.Riptide.Utilities
     public class MessageTypes
     {
         public const ushort FusionMessage = 1;
-        public const ushort VoiceChat = 2;
     }
 }

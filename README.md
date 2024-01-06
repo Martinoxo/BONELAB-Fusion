@@ -1,29 +1,45 @@
-# BONELAB TideFusion Rewrite
-A fork of BONELAB Fusion, utilizing P2P networking in order to support Quest users without a PC.
+# BONELAB Fusion Release
+A multiplayer mod for BONELAB featuring support for all platforms.
 [You can view a basic installation guide here.](INSTALLATION.md)
 
-#### THIS IS A REWRITE OF THE ORIGIONAL TIDEFUSION PROJECT, NOT ALL THINGS ARE PRESENT IN THIS REPOSITORY
+![](https://i.imgur.com/1ZpMfei.png)
 
 ## Networking
-This fork introduces a new networking layer option titled "Riptide", which is based on the P2P transport model. This networking solution allows devices to connect directly to eachother, meaning Quest users do not need any external device to connect to other players (no Fusion Helper), and that the latency between player to player is much smaller. However, there is the quirk that the host of a server needs to "Port Forward", which allows external connections to enter the network, but it also sort of a safety hazard. More info on Port Forwarding is contained [here](https://cybernews.com/what-is-vpn/port-forwarding/).
-#### VOICE CHAT HAS NOT YET BEEN IMPLEMENTED IN THE RIPTIDE LAYER FOR QUEST _OR_ PC.
+This mod is networked and built around Steam, but the networking system can be swapped out using a Networking Layer.
+
+## Modules
+Fusion supports a system called "Modules". This allows other code mods to add on and sync their own events in Fusion.
+Fusion also has an SDK for integrating features into Marrow™ SDK items, maps, and more.
+
+## Marrow SDK Integration
+NOTICE:
+When using the integration, if you have the extended sdk installed, delete the "MarrowSDK" script that comes with the extended sdk.
+It can be found in "Scripts/SLZ.Marrow.SDK/SLZ/Marrow/MarrowSDK".
+The reason for this is that this is already included in the real sdk, and Fusion uses some values from it, causing it to get confused.
+
+You can download the integration unity package from [the Releases tab of this repository](https://github.com/Lakatrazz/BONELAB-Fusion/releases/latest).
+Alternatively, you can download the files raw [here](https://github.com/Lakatrazz/BONELAB-Fusion/tree/main/Core/marrow-integration).
+
+## Module Example
+The module example can be found here:
+https://github.com/Lakatrazz/Fusion-Module-Example
 
 ## Credits
-- Lakatrazz: Created the base Fusion mod, without that of course TideFusion would not exist.
-- All other credits are on the base Fusion repository
+- BoneLib AutoUpdater: https://github.com/yowchap/BoneLib
+- Testing/Development Credits In Game
 
 ## Licensing
-- The source code of [Riptide Networking](https://github.com/RiptideNetworking/Riptide) is used under the MIT License. The full license can be found [here](https://github.com/RiptideNetworking/Riptide/blob/main/LICENSE.md).
-- The source of [BONELAB Fusion](https://github.com/Lakatrazz/BONELAB-Fusion) is used under the MIT Liscense. The full license can be found [here](https://github.com/Lakatrazz/BONELAB-Fusion/blob/main/LICENSE).
+- The source code of [Facepunch.Steamworks](https://github.com/Facepunch/Facepunch.Steamworks) is used partially under the MIT License. The full license can be found [here](https://github.com/Facepunch/Facepunch.Steamworks/blob/master/LICENSE).
+- The source code of [Steamworks.NET](https://github.com/rlabrecque/Steamworks.NET) is used partially under the MIT License. The full license can be found [here](https://github.com/rlabrecque/Steamworks.NET/blob/master/LICENSE.txt).
+- The source code of [LiteNetLib](https://github.com/RevenantX/LiteNetLib) is included under the MIT License. The full license can be found [here](https://github.com/RevenantX/LiteNetLib/blob/master/LICENSE.txt).
 
 ## Setting up the Source Code
 1. Clone the git repo into a folder
 2. Setup a "managed" folder in the "Core" folder.
 3. Drag the dlls from Melonloader/Managed into the managed folder.
 4. Drag MelonLoader.dll and 0Harmony.dll into the managed folder.
-5. Place the RiptideNetworking.dll and netstandard.dll from the plugins folder included in the release into the managed folder.
-6. You're done!
+5. You're done!
 
 ## Disclaimer
 
-#### THIS PROJECT IS NOT AFFILIATED WITH SLZ, LAKATRAZZ, OR ANY OTHER MULTIPLAYER MOD DEVELOPMENT TEAMS.
+#### THIS PROJECT IS NOT AFFILIATED WITH ANY OTHER MULTIPLAYER MODS OR STRESS LEVEL ZERO! This is its own standalone mod and shares no code with others, any similarities are coincidental!

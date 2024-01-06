@@ -127,7 +127,14 @@ namespace LabFusion.Riptide
         
         public static void OnMessageReceived(object obj, MessageReceivedEventArgs args)
         {
-            FusionMessageHandler.ReadMessage(args.Message.GetBytes());
+            switch (args.MessageId)
+            {
+                case MessageTypes.FusionMessage:
+                    {
+                        FusionMessageHandler.ReadMessage(args.Message.GetBytes());
+                        break;
+                    }
+            }
         }
     }
 }

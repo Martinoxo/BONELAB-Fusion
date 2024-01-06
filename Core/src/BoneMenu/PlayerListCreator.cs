@@ -26,7 +26,7 @@ namespace LabFusion.BoneMenu
             _playerListCategory.CreateFunctionElement("Select Refresh to load players!", Color.yellow, null);
         }
 
-        public static void RefreshPlayerList()
+        private static void RefreshPlayerList()
         {
             // Clear existing lobbies
             _playerListCategory.Elements.Clear();

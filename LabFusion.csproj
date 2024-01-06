@@ -462,6 +462,8 @@
     <Compile Include="Core\src\Network\Proxy\ProxyVoiceManager.cs" />
     <Compile Include="Core\src\Network\Proxy\ProxyVoiceHandler.cs" />
     <Compile Include="Core\src\Network\Riptide\BoneMenu\ServerListing.cs" />
+    <Compile Include="Core\src\Network\Riptide\BoneMenu\UI\Keyboard\Keyboard.cs" />
+    <Compile Include="Core\src\Network\Riptide\BoneMenu\UI\Keyboard\KeyboardCanvas.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\Client\ClientManagement.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\Messages\FusionMessage.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\RiptideNetworkLayer.cs" />
@@ -474,8 +476,8 @@
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\PlayerListPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Patching\Fusion Patching\SceneManagerPatches.cs" />
     <Compile Include="Core\src\Network\Riptide\Preferences\RiptidePreferences.cs" />
-    <Compile Include="Core\src\Network\Riptide\Utilites\Data\ResourcePaths.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\netstandardLoader.cs" />
+    <Compile Include="Core\src\Network\Riptide\Utilites\Data\ResourcePaths.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\RiptideNetworkingLoader.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\ServerListSaving.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\TideContentLoader.cs" />
@@ -483,8 +485,6 @@
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\ServerTypes.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Internal\IPExtensions.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\PlayerInfo.cs" />
-    <Compile Include="Core\src\Network\Riptide\BoneMenu\UI\Keyboard\Keyboard.cs" />
-    <Compile Include="Core\src\Network\Riptide\BoneMenu\UI\Keyboard\KeyboardCanvas.cs" />
     <Compile Include="Core\src\Network\Steam\SpacewarNetworkLayer.cs" />
     <Compile Include="Core\src\Network\Steam\SteamVoiceManager.cs" />
     <Compile Include="Core\src\Network\Steam\SteamVRNetworkLayer.cs" />
@@ -894,8 +894,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Core\managed\Il2Cppmscorlib.dll</HintPath>
     </Reference>
-    <Reference Include="Il2CppNewtonsoft.Json, Version=13.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Il2CppNewtonsoft.Json">
       <HintPath>Core\managed\Il2CppNewtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppSystem, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -910,11 +909,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Core\managed\MelonLoader.dll</HintPath>
     </Reference>
-    <Reference Include="Oculus.Platform, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Oculus.Platform">
       <HintPath>Core\managed\Oculus.Platform.dll</HintPath>
     </Reference>
-    <Reference Include="RiptideNetworking, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="RiptideNetworking, Version=2.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Core\managed\RiptideNetworking.dll</HintPath>
     </Reference>
