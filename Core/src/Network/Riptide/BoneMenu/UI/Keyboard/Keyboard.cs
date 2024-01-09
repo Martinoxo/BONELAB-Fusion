@@ -13,6 +13,7 @@ using System.Configuration;
 using LabFusion.UI;
 using SLZ.Props;
 using LabFusion.Riptide.Utilities;
+using System.Windows.Forms;
 
 namespace LabFusion.Riptide.BoneMenu
 {
@@ -27,6 +28,7 @@ namespace LabFusion.Riptide.BoneMenu
         public static Keyboard CreateKeyboard(BoneLib.BoneMenu.Elements.MenuCategory category, string name, Action<string> onEnter)
         {
             Keyboard keyboard = new Keyboard();
+            Keyboards.Add(keyboard);
 
             MenuCategory keyboardCategory = category.CreateCategory(name, Color.cyan);
 
@@ -58,7 +60,6 @@ namespace LabFusion.Riptide.BoneMenu
             keyboardCanvas.SetupReferences();
             keyboard.KeyboardObject = keyboardObject;
 
-            Keyboards.Add(keyboard);
             keyboardObject.SetActive(false);
 
             return keyboard;
@@ -102,7 +103,13 @@ namespace LabFusion.Riptide.BoneMenu
                             obj.KeyboardObject.transform.localRotation = Quaternion.identity;
                             obj.KeyboardObject.transform.localScale = new Vector3 (180, 180, 180);
                         } else
+                        {
                             obj.KeyboardObject.SetActive(true);
+                            obj.KeyboardObject.transform.parent = __instance.MainPage.transform;
+                            obj.KeyboardObject.transform.localPosition = new Vector3(0, 0, 40);
+                            obj.KeyboardObject.transform.localRotation = Quaternion.identity;
+                            obj.KeyboardObject.transform.localScale = new Vector3(180, 180, 180);
+                        }
 
                         break;
                     }

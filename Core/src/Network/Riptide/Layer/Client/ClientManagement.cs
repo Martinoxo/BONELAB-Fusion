@@ -12,12 +12,14 @@ using Riptide;
 using LabFusion.Network;
 using System.Drawing;
 using System.Runtime.Remoting.Messaging;
+using LabFusion.Riptide.Preferences;
 
 namespace LabFusion.Riptide
 {
     public class ClientManagement
     {
         public static Client CurrentClient = new();
+        public static Client PublicLobbyClient = new();
 
         public static bool IsConnecting { get; private set; }
 
@@ -62,7 +64,7 @@ namespace LabFusion.Riptide
             if (CurrentClient.IsConnected)
                 CurrentClient.Disconnect();
 
-            if (!uint.TryParse(code, out uint codeInt))
+            if (!uint.TryParse(code, out uint codeInt) && !code.Contains("."))
             {
                 FusionNotifier.Send(new FusionNotification()
                 {
@@ -86,6 +88,29 @@ namespace LabFusion.Riptide
             CurrentClient.Connect($"{code}:{port}", 5, 0, null, false);
 
             IsConnecting = true;
+        }
+
+        public static void JoinPublicLobby(ushort hostId)
+        {
+            string serverIp = RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue();
+            if (string.IsNullOrEmpty(serverIp)) 
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    title = "No Server IP",
+                    showTitleOnPopup = true,
+                    message = $"You have no Public Lobby IP to join! Add one in Riptide Settings!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
+            }
+
+            if (IsConnecting)
+            {
+
+            }
         }
 
         private static void OnConnectToP2PServer(object sender, EventArgs e)

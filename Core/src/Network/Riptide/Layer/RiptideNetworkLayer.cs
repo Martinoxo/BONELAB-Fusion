@@ -362,6 +362,7 @@ namespace LabFusion.Riptide
         {
             CurrentServer.Update();
             CurrentClient.Update();
+            PublicLobbyClient.Update();
         }
 
         internal override void OnUpdateLobby()

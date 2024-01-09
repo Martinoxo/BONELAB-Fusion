@@ -1,13 +1,6 @@
-﻿using BoneLib.BoneMenu.Elements;
-using LabFusion.Utilities;
-using System;
+﻿using LabFusion.Utilities;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnhollowerBaseLib;
-using Il2CppNewtonsoft.Json;
-using System.Web;
+using System.IO;
 
 namespace LabFusion.Riptide.Utilities
 {
@@ -21,22 +14,13 @@ namespace LabFusion.Riptide.Utilities
 
             int count = 1;
             foreach (var file in System.IO.Directory.GetFiles(ServerListPath))
-            {
                 count++;
-            }
 
-#if DEBUG
-            FusionLogger.Log($"Saving data {count}:\n" +
-                $"{data.Name}\n" +
-                $"{data.ServerCode}\n" +
-                $"{data.Port}");
-#endif
+            string path = ServerListPath + $"/ServerListing_{count}.json";
 
-            var text = System.IO.File.CreateText(ServerListPath + $"/ServerListing {count}.txt");
-            text.WriteLine(data.Name);
-            text.WriteLine(data.ServerCode);
-            text.WriteLine(data.Port);
-            text.Close();
+            var jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(data);
+
+            File.WriteAllText(path, jsonData);
         }
 
         internal static ServerListData[] LoadServerList()
@@ -48,12 +32,15 @@ namespace LabFusion.Riptide.Utilities
 
             foreach (var filePath in System.IO.Directory.GetFiles(ServerListPath))
             {
-                string[] fileData = System.IO.File.ReadAllLines(filePath);
-                FusionLogger.Log($"Reading data from file {System.IO.Path.GetFileName(filePath)}");
-                ServerListData data = new ServerListData();
-                data.Name = fileData[0];
-                data.ServerCode = fileData[1];
-                data.Port = ushort.Parse(fileData[2]);
+                if (!Path.GetFileName(filePath).StartsWith("ServerListing_"))
+                {
+                    // Delete the file if it's in the old format (before json)
+                    System.IO.File.Delete(filePath);
+                    continue;
+                }
+
+                string jsonText = System.IO.File.ReadAllText(filePath);
+                ServerListData data = Newtonsoft.Json.JsonConvert.DeserializeObject<ServerListData>(jsonText);
                 data.ServerListDataPath = filePath;
 
                 dataList.Add(data);

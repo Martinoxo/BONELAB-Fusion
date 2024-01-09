@@ -15,12 +15,14 @@ namespace LabFusion.Riptide.Preferences
         public class ServerSettings
         {
             public IFusionPref<ushort> ServerPort;
+            public IFusionPref<string> PublicLobbyServerIp;
 
             public static ServerSettings CreateMelonPrefs()
             {
                 return new ServerSettings()
                 {
-                    ServerPort = new FusionPref<ushort>(TideCategory, "ServerPort", 7777)
+                    ServerPort = new FusionPref<ushort>(TideCategory, "ServerPort", 7777),
+                    PublicLobbyServerIp = new FusionPref<string>(TideCategory, "PublicLobbyServerIp", "172.0.0.1")
                 };
             }
         }
