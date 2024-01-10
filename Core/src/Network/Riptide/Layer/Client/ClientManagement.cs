@@ -128,6 +128,8 @@ namespace LabFusion.Riptide
 
             IsConnecting = false;
 
+            RiptideNetworkLayer.CurrentServerType = ServerTypes.P2P;
+
             CurrentClient.TimeoutTime = 30000;
             CurrentClient.Connection.CanQualityDisconnect = false;
             

@@ -51,6 +51,8 @@ namespace LabFusion.Riptide
         {
             ClientManagement.CurrentClient.Connected -= OnConnectToP2PServer;
 
+            RiptideNetworkLayer.CurrentServerType = ServerTypes.P2P;
+
             ClientManagement.CurrentClient.TimeoutTime = 30000;
             ClientManagement.CurrentClient.Connection.CanQualityDisconnect = false;
             

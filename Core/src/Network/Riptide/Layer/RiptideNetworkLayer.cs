@@ -34,7 +34,7 @@ namespace LabFusion.Riptide
     {
         public static readonly string TideFusionPath = $"{MelonUtils.UserDataDirectory}/TideFusion";
 
-        public ServerTypes CurrentServerType = ServerTypes.None;
+        public static ServerTypes CurrentServerType = ServerTypes.None;
 
         internal override bool IsClient => CurrentClient.IsConnected;
         internal override bool IsServer => CurrentServer.IsRunning;
@@ -398,13 +398,22 @@ namespace LabFusion.Riptide
 
         internal override void BroadcastMessage(NetworkChannel channel, FusionMessage message)
         {
-            if (IsServer)
+            switch (CurrentServerType)
             {
-                CurrentServer.SendToAll(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel));
-            }
-            else
-            {
-                CurrentClient.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), true);
+                case ServerTypes.P2P:
+                    if (IsServer)
+                    {
+                        CurrentServer.SendToAll(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel));
+                    }
+                    else
+                    {
+                        CurrentClient.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), true);
+                    }
+                    break;
+                case ServerTypes.Public:
+                    break;
+                case ServerTypes.Dedicated:
+                    break;
             }
         }
 

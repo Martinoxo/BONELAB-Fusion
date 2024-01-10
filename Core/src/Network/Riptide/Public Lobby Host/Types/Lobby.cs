@@ -28,8 +28,7 @@ namespace LobbyHost.Types
             {
                 if (lobby.LobbyInfo.HostId == connection.Id)
                 {
-                    Core.Server.TryGetClient(lobby.LobbyInfo.HostId, out Connection hostConnection);
-                    args = new LobbyDisconnectArgs(true, lobby, hostConnection);
+                    args = new LobbyDisconnectArgs(true, lobby, connection);
                     return args;
                 }
 

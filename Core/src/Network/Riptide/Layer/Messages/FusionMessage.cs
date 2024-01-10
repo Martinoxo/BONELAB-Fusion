@@ -1,5 +1,6 @@
 ﻿using LabFusion.Network;
 using LabFusion.Riptide.Utilities;
+using LabFusion.Utilities;
 using Riptide;
 using System;
 using System.Collections.Generic;
@@ -21,13 +22,7 @@ namespace LabFusion.Riptide.Messages
         /// <returns></returns>
         public static Message CreateFusionMessage(LabFusion.Network.FusionMessage message, NetworkChannel channel)
         {
-            // Create new Riptide message
-            Message fusionMessage = Message.Create(ConvertSendMode(channel), MessageTypes.FusionMessage);
-
-            // Add byte[] after converting Fusion message
-            fusionMessage.AddBytes(message.ToByteArray());
-
-            return fusionMessage;
+            return Message.Create(ConvertSendMode(channel), MessageTypes.FusionMessage).AddBytes(message.ToByteArray());
         }
 
         private static MessageSendMode ConvertSendMode(NetworkChannel fusionChannel)
