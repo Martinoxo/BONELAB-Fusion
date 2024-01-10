@@ -10,6 +10,9 @@ using UnityEngine;
 
 namespace LabFusion.Riptide.Utilities
 {
+    /// <summary>
+    /// Used for loading Tide assets from the embedded resources.
+    /// </summary>
     public static class TideContentLoader
     {
         public static T LoadPersistentAsset<T>(this AssetBundle bundle, string name) where T : UnityEngine.Object

@@ -13,6 +13,12 @@ namespace LabFusion.Riptide.Messages
 {
     public class FusionMessage
     {
+        /// <summary>
+        /// Creates a Riptide message from a Fusion message.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="channel"></param>
+        /// <returns></returns>
         public static Message CreateFusionMessage(LabFusion.Network.FusionMessage message, NetworkChannel channel)
         {
             // Create new Riptide message

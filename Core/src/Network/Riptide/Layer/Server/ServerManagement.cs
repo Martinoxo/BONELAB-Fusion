@@ -82,6 +82,11 @@ namespace LabFusion.Riptide
             args.Client.CanQualityDisconnect = false;
         }
 
+        /// <summary>
+        /// Calls a handler when a message is received based on its MessageId.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="args"></param>
         public static void OnMessageReceived(object obj, MessageReceivedEventArgs args)
         {
             switch (args.MessageId)

@@ -32,6 +32,10 @@ namespace LabFusion.Riptide.BoneMenu
 
         private List<MenuCategory> _listingCategories = new List<MenuCategory>();
         
+        /// <summary>
+        /// Creates a category for Server Listings to be created and managed.
+        /// </summary>
+        /// <param name="category"></param>
         public static void CreateServerListingCategory(MenuCategory category)
         {
             ServerListingCategory serverListingCategory = new();
@@ -104,7 +108,10 @@ namespace LabFusion.Riptide.BoneMenu
             _portKeyboard.Category.SetName($"Edit Port:\n{_portToEnter}");
         }
 
-        public void RefreshListings()
+        /// <summary>
+        /// Removes all listings and re-creates them.
+        /// </summary>
+        private void RefreshListings()
         {
             foreach (var category in _listingCategories.ToArray())
             {
@@ -123,6 +130,10 @@ namespace LabFusion.Riptide.BoneMenu
             BoneLib.BoneMenu.MenuManager.SelectCategory(_category);
         }
 
+        /// <summary>
+        /// Writes over a Server Listing with new data.
+        /// </summary>
+        /// <param name="data"></param>
         private void EditServerListing(ServerListData data)
         {
             var jsonData = Newtonsoft.Json.JsonConvert.SerializeObject(data);
@@ -132,6 +143,10 @@ namespace LabFusion.Riptide.BoneMenu
             RefreshListings();
         }
 
+        /// <summary>
+        /// Creates a list of all the Server Listings in a specified category.
+        /// </summary>
+        /// <param name="category"></param>
         private void CreateServerList(MenuCategory category)
         {
             foreach (var listing in ServerListSaving.LoadServerList())
@@ -147,13 +162,13 @@ namespace LabFusion.Riptide.BoneMenu
                 {
                     listing.Name = name;
                     EditServerListing(listing);
-                    MenuManager.SelectCategory(listingCategory);
+                    MenuManager.SelectCategory(_category);
                 });
                 Keyboard.CreateKeyboard(editCategory, "Edit Code", (code) =>
                 {
                     listing.ServerCode = code;
                     EditServerListing(listing);
-                    MenuManager.SelectCategory(listingCategory);
+                    MenuManager.SelectCategory(_category);
                 });
                 editCategory.CreateFunctionElement("Delete Listing", Color.red, () => OnClickDelete(listing, listingCategory));
 

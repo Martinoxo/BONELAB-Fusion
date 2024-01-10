@@ -9,19 +9,16 @@ namespace LobbyHost.Types
 {
     public class Lobby
     {
-        public string Name;
-        public string HostName;
-        public ushort HostId;
-        public byte MaxPlayers;
-        public byte CurrentPlayerCount;
+        public RiptideLobbyInfo LobbyInfo = new();
         public List<Connection> Clients = new();
 
         public Lobby(Connection hostConnetcion, string name, string hostName, byte maxPlayers, byte currentPlayers)
         {
-            Name = name;
-            HostName = hostName;
-            MaxPlayers = maxPlayers;
-            HostId = hostConnetcion.Id;
+            LobbyInfo.HostId = hostConnetcion.Id;
+            LobbyInfo.Name = name;
+            LobbyInfo.HostName = hostName;
+            LobbyInfo.MaxPlayers = maxPlayers;
+            LobbyInfo.CurrentPlayerCount = currentPlayers;
         }
 
         internal static LobbyDisconnectArgs GetDisconnectArgs(Connection connection)
@@ -29,9 +26,9 @@ namespace LobbyHost.Types
             LobbyDisconnectArgs args;
             foreach (Lobby lobby in Core.CurrentLobbies)
             {
-                if (lobby.HostId == connection.Id)
+                if (lobby.LobbyInfo.HostId == connection.Id)
                 {
-                    Core.Server.TryGetClient(lobby.HostId, out Connection hostConnection);
+                    Core.Server.TryGetClient(lobby.LobbyInfo.HostId, out Connection hostConnection);
                     args = new LobbyDisconnectArgs(true, lobby, hostConnection);
                     return args;
                 }

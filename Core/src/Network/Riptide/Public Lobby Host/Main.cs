@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Timers;
 using LobbyHost.Types;
+using LobbyHost.UI;
 using Riptide;
 using Riptide.Utils;
 
@@ -12,21 +14,24 @@ namespace LobbyHost
 
         static void Main(string[] args)
         {
-#if DEBUG
-            RiptideLogger.Initialize(Console.WriteLine, true);
-#endif
+            Console.Title = "BONELAB Lobby Host";
 
             Server = new Server();
             Server.ClientConnected += Hooking.OnClientConnected;
             Server.ClientDisconnected += Hooking.OnClientDisconnected;
+            Server.MessageReceived += Hooking.OnMessageReceived;
             Server.Start(6666, 30);
 
-            while (true)
-            {
-                Server.Update();
+            System.Timers.Timer riptideTimer = new(5);
+            riptideTimer.Elapsed += RiptideTick;
+            riptideTimer.Start();
 
-                Thread.Sleep(8);
-            }
+            TUIManager.RefreshUi();
+        }
+
+        private static void RiptideTick(object? sender, ElapsedEventArgs e)
+        {
+            Server.Update();
         }
     }
 }

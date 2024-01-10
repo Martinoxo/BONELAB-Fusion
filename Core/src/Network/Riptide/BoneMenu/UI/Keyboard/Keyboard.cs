@@ -25,6 +25,13 @@ namespace LabFusion.Riptide.BoneMenu
         public MenuCategory Category;
         public GameObject KeyboardObject;
 
+        /// <summary>
+        /// Creates a keyboard in a specified <paramref name="category"/> with the <paramref name="name"/> given, then calls <paramref name="onEnter"/> when the enter button is pressed.
+        /// </summary>
+        /// <param name="category"></param>
+        /// <param name="name"></param>
+        /// <param name="onEnter"></param>
+        /// <returns></returns>
         public static Keyboard CreateKeyboard(BoneLib.BoneMenu.Elements.MenuCategory category, string name, Action<string> onEnter)
         {
             Keyboard keyboard = new Keyboard();
@@ -65,6 +72,9 @@ namespace LabFusion.Riptide.BoneMenu
             return keyboard;
         }
 
+        /// <summary>
+        /// Checks if a category is a keyboard category, then creates the keyboard on the Bonemenu canvas.
+        /// </summary>
         [HarmonyPatch(typeof(UIManager), nameof(UIManager.OnCategoryUpdated))]
         public class CategoryUpdatePatch
         {

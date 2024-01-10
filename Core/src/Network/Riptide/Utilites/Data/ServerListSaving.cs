@@ -7,6 +7,11 @@ namespace LabFusion.Riptide.Utilities
     internal static class ServerListSaving
     {
         private static readonly string ServerListPath = $"{RiptideNetworkLayer.TideFusionPath}/ServerListings";
+
+        /// <summary>
+        /// Saves the server list data to a json file.
+        /// </summary>
+        /// <param name="data"></param>
         internal static void SaveServerList(ServerListData data)
         {
             if (!System.IO.Directory.Exists(ServerListPath))
@@ -23,6 +28,10 @@ namespace LabFusion.Riptide.Utilities
             File.WriteAllText(path, jsonData);
         }
 
+        /// <summary>
+        /// Loads the server list data from the Serveer Listings folder into an array.
+        /// </summary>
+        /// <returns></returns>
         internal static ServerListData[] LoadServerList()
         {
             if (!System.IO.Directory.Exists(ServerListPath))

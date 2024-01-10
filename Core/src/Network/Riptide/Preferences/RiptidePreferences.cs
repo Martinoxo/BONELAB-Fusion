@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace LabFusion.Riptide.Preferences
 {
+    /// <summary>
+    /// Class for creating FusionPreferences in a separate MelonPreferences category.
+    /// </summary>
     public static class RiptidePreferences
     {
         internal static MelonPreferences_Category TideCategory = MelonPreferences.CreateCategory("BONELAB TideFusion");

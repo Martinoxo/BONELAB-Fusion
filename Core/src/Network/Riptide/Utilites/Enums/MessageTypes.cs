@@ -7,8 +7,11 @@ using System.Threading.Tasks;
 
 namespace LabFusion.Riptide.Utilities
 {
+    /// <summary>
+    /// Different Riptide message types.
+    /// </summary>
     public class MessageTypes
     {
-        public const ushort FusionMessage = 1;
+        public const ushort FusionMessage = 0;
     }
 }

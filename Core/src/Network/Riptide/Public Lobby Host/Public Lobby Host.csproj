@@ -9,9 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Types\ServerInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="RiptideNetworking">
       <HintPath>..\..\..\..\managed\RiptideNetworking.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Utilities\" />
   </ItemGroup>
 
 </Project>

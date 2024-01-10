@@ -12,7 +12,9 @@ namespace LabFusion.Riptide.Patching
     [HarmonyPatch(typeof(FusionSceneManager))]
     public static class SceneManagerPatches
     {
-        // Fix pesky font issue on Quest
+        /// <summary>
+        /// Fixes Font issues on Quest.
+        /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch("Internal_UpdateLoadStatus")]
         public static void OnLevelUpdate()

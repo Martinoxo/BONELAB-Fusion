@@ -11,11 +11,20 @@ using UnityEngine.Networking;
 
 namespace LabFusion.Riptide.Utilities
 {
+    /// <summary>
+    /// Class for managing player info.
+    /// </summary>
     public class PlayerInfo
     {
+        /// <summary>
+        /// Last IP obtained from Ipify. Null if failed to obtain.
+        /// </summary>
         internal static string PlayerIpAddress;
 
         #region USERNAME
+        /// <summary>
+        /// Inits Oculus or Steam based on platform, then sets the player's username.
+        /// </summary>
         public static void InitializeUsername()
         {
             if (!HelperMethods.IsAndroid())
@@ -56,6 +65,10 @@ namespace LabFusion.Riptide.Utilities
         }
         #endregion
 
+        #region PLAYERIP
+        /// <summary>
+        /// Requests the player's IP address from Ipify, then sets the PlayerIpAddress variable.
+        /// </summary>
         internal static void InitializePlayerIPAddress()
         {
             string ip = "";
@@ -83,5 +96,6 @@ namespace LabFusion.Riptide.Utilities
                 FusionLogger.Error(e);
             }
         }
+        #endregion
     }
 }

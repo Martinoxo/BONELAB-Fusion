@@ -21,7 +21,9 @@ namespace LabFusion.Riptide.Patching
     [HarmonyPatch(typeof(BoneMenuCreator))]
     public static class PlayerListPatches
     {
-        // Remove the Ban button since Banning doesn't work in tide :P
+        /// <summary>
+        /// Removes the Ban button in the Tide layer.
+        /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch("RefreshPlayerList")]
         public static void ModifyPlayerMenu()

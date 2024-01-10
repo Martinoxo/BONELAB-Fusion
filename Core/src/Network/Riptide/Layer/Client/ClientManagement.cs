@@ -23,6 +23,11 @@ namespace LabFusion.Riptide
 
         public static bool IsConnecting { get; private set; }
 
+        /// <summary>
+        /// Connects to a server, if the player is not already connecting to a server.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <param name="port"></param>
         public static void P2PJoinServer(string code, ushort port)
         {
             if (IsConnecting)
@@ -90,6 +95,10 @@ namespace LabFusion.Riptide
             IsConnecting = true;
         }
 
+        /// <summary>
+        /// Connects to a Public Lobby based on the <paramref name="hostId"/> given.
+        /// </summary>
+        /// <param name="hostId"></param>
         public static void JoinPublicLobby(ushort hostId)
         {
             string serverIp = RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue();
@@ -129,6 +138,11 @@ namespace LabFusion.Riptide
             InternalLayerHelpers.OnUpdateLobby();
         }
 
+        /// <summary>
+        /// Warns the client that a connection has failed.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public static void OnConnectionFail(object sender, ConnectionFailedEventArgs e)
         {
             IsConnecting = false;
@@ -149,7 +163,12 @@ namespace LabFusion.Riptide
         {
             InternalServerHelpers.OnDisconnect();
         }
-        
+
+        /// <summary>
+        /// Calls a handler when a message is received based on its MessageId.
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="args"></param>
         public static void OnMessageReceived(object obj, MessageReceivedEventArgs args)
         {
             switch (args.MessageId)

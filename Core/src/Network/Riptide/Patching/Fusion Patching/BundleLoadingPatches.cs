@@ -11,7 +11,9 @@ namespace LabFusion.Riptide.Utilities
     [HarmonyPatch(typeof(FusionBundleLoader))]
     public static class BundleLoadingPatches
     {
-        // Load Tide bundle
+        /// <summary>
+        /// Loads the Tide bundle when the Fusion bundle is loaded.
+        /// </summary>
         [HarmonyPostfix]
         [HarmonyPatch(nameof(FusionBundleLoader.OnBundleLoad))]
         public static void LoadTideBundle()

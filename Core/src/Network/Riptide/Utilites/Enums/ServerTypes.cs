@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace LabFusion.Riptide.Utilities
 {
+    /// <summary>
+    /// Server types for when a server is created or joined.
+    /// </summary>
     public enum ServerTypes
     {
         None = 0,

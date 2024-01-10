@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace LabFusion.Riptide.Utilities
 {
+    /// <summary>
+    /// Contains different paths to embedded resources within the TIDE layer.
+    /// </summary>
     internal static class ResourcePaths
     {
         internal const string RiptideNetworkingPath = "LabFusion.Core.src.Network.Riptide.resources.lib.RiptideNetworking.dll";

@@ -16,7 +16,10 @@ namespace LabFusion.Riptide.Patching
     [HarmonyPatch(typeof(FusionMod))]
     public static class ModPatches
     {
-        // Remove auto-updater warning
+        /// <summary>
+        /// Removes Fusion's Auto-Updater warning on PC.
+        /// </summary>
+        /// <returns></returns>
         [HarmonyPrefix]
         [HarmonyPatch(nameof(FusionMod.OnLateInitializeMelon))]
         public static bool ModifyLateInitializeMelon()
@@ -31,7 +34,9 @@ namespace LabFusion.Riptide.Patching
             return false;
         }
 
-        // Load APIs
+        /// <summary>
+        /// Loads RiptideNetworking and netstandard when Fusion is initialized.
+        /// </summary>
         [HarmonyPrefix]
         [HarmonyPatch(nameof(FusionMod.OnInitializeMelon))]
         public static void LoadAPIs()
