@@ -52,7 +52,7 @@ namespace LabFusion.Riptide
                 FusionNotifier.Send(new FusionNotification()
                 {
                     title = "No Server Code",
-                    showTitleOnPopup = true,
+                    showTitleOnPopup = false,
                     message = $"You have not entered a server code to join! Please click on the \"Server Code\" button to enter a server code!",
                     isMenuItem = false,
                     isPopup = true,
@@ -107,7 +107,7 @@ namespace LabFusion.Riptide
                 FusionNotifier.Send(new FusionNotification()
                 {
                     title = "No Server IP",
-                    showTitleOnPopup = true,
+                    showTitleOnPopup = false,
                     message = $"You have no Public Lobby IP to join! Add one in Riptide Settings!",
                     isMenuItem = false,
                     isPopup = true,
@@ -118,7 +118,16 @@ namespace LabFusion.Riptide
 
             if (IsConnecting)
             {
-
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    title = "Already Connecting",
+                    showTitleOnPopup = false,
+                    message = $"Already connecting to a server!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
             }
         }
 

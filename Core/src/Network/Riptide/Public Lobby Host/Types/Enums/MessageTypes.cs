@@ -19,6 +19,6 @@ namespace LobbyHost.Types
         public const ushort CreateLobby = 11;
         public const ushort UpdateLobby = 12;
 
-        public const ushort RequestLobbyInfo = 100;
+        public const ushort RequestLobbies = 100;
     }
 }

@@ -466,6 +466,7 @@
     <Compile Include="Core\src\Network\Riptide\BoneMenu\UI\Keyboard\KeyboardCanvas.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\Client\ClientManagement.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\Messages\FusionMessage.cs" />
+    <Compile Include="Core\src\Network\Riptide\Layer\Messages\PublicLobbyMessage.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\RiptideNetworkLayer.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\Server\ServerManagement.cs" />
     <Compile Include="Core\src\Network\Riptide\Layer\Voice\RiptideVoiceHandler.cs" />

@@ -36,9 +36,9 @@ namespace LobbyHost
         {
             switch (e.MessageId)
             {
-                case MessageTypes.RequestLobbyInfo:
+                case MessageTypes.RequestLobbies:
                     {
-                        LobbyMessageHandler.HandleUpdateLobbyInfo(e.Message, e.FromConnection);
+                        LobbyMessageHandler.HandleRequestLobbies(e.Message, e.FromConnection);
                         break;
                     }
                 case MessageTypes.CreateLobby:

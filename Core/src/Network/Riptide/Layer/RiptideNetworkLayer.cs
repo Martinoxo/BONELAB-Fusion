@@ -36,8 +36,27 @@ namespace LabFusion.Riptide
 
         public static ServerTypes CurrentServerType = ServerTypes.None;
 
-        internal override bool IsClient => CurrentClient.IsConnected;
-        internal override bool IsServer => CurrentServer.IsRunning;
+        internal override bool IsClient => CheckIsClient();
+        internal override bool IsServer => CheckIsServer();
+
+        /// <summary>
+        /// The ID of the host of a Public Lobby. Returns 0 if not in a Public Lobby or not connected to a server.
+        /// </summary>
+        internal static ushort CurrentHostId
+        {
+            get
+            {
+                if (CurrentServerType != ServerTypes.Public || !CurrentClient.IsConnected)
+                    return 0;
+                else
+                    return CurrentHostId;
+            }
+
+            set
+            {
+                CurrentHostId = value;
+            }
+        }
 
         private readonly RiptideVoiceManager _voiceManager = new();
         internal override IVoiceManager VoiceManager => _voiceManager;
@@ -358,6 +377,46 @@ namespace LabFusion.Riptide
                                            $"{result}");
         }
 
+        private bool CheckIsClient()
+        {
+            switch (CurrentServerType)
+            {
+                case ServerTypes.None:
+                    return false;
+                case ServerTypes.P2P:
+                    return CurrentClient.IsConnected;
+                case ServerTypes.Public:
+                    if (PublicLobbyClient.IsConnected)
+                        return true;
+                    else
+                        return false;
+                case ServerTypes.Dedicated:
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        private bool CheckIsServer()
+        {
+            switch (CurrentServerType)
+            {
+                case ServerTypes.None:
+                    return false;
+                case ServerTypes.P2P:
+                    return CurrentServer.IsRunning;
+                case ServerTypes.Public:
+                    if (PublicLobbyClient.Id == CurrentHostId)
+                        return true;
+                    else
+                        return false;
+                case ServerTypes.Dedicated:
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
         internal override void OnUpdateLayer()
         {
             CurrentServer.Update();
@@ -396,6 +455,8 @@ namespace LabFusion.Riptide
 
         internal override void StartServer() => ServerManagement.StartServer();
 
+        #region Fusion Messaging
+        #region BROADCAST
         internal override void BroadcastMessage(NetworkChannel channel, FusionMessage message)
         {
             switch (CurrentServerType)
@@ -416,12 +477,23 @@ namespace LabFusion.Riptide
                     break;
             }
         }
-
+        #endregion
+        #region SENDTOSERVER
         internal override void SendToServer(NetworkChannel channel, FusionMessage message)
         {
-            CurrentClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel));
+            switch (CurrentServerType)
+            {
+                case ServerTypes.P2P:
+                    CurrentClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel));
+                    break;
+                case ServerTypes.Public:
+                    break;
+                case ServerTypes.Dedicated:
+                    break;
+            }
         }
-
+        #endregion
+        #region SENDFROMSERVER
         internal override void SendFromServer(byte userId, NetworkChannel channel, FusionMessage message)
         {
             PlayerId playerId = PlayerIdManager.GetPlayerId(userId);
@@ -433,19 +505,30 @@ namespace LabFusion.Riptide
 
         internal override void SendFromServer(ulong userId, NetworkChannel channel, FusionMessage message)
         {
-            if (IsServer)
+            switch (CurrentServerType)
             {
-                Connection client;
-                if (userId == PlayerIdManager.LocalLongId)
-                {
-                    CurrentServer.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), (ushort)PlayerIdManager.LocalLongId);
-                }
-                else if (CurrentServer.TryGetClient((ushort)userId, out client))
-                {
-                    CurrentServer.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), client, true);
-                }
+                case ServerTypes.P2P:
+                    if (IsServer)
+                    {
+                        Connection client;
+                        if (userId == PlayerIdManager.LocalLongId)
+                        {
+                            CurrentServer.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), (ushort)PlayerIdManager.LocalLongId);
+                        }
+                        else if (CurrentServer.TryGetClient((ushort)userId, out client))
+                        {
+                            CurrentServer.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), client, true);
+                        }
+                    }
+                    break;
+                case ServerTypes.Public:
+                    break;
+                case ServerTypes.Dedicated:
+                    break;
             }
         }
+        #endregion
+        #endregion
 
         internal override void Disconnect(string reason = "")
         {
