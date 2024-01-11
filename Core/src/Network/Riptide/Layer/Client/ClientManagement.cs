@@ -95,42 +95,6 @@ namespace LabFusion.Riptide
             IsConnecting = true;
         }
 
-        /// <summary>
-        /// Connects to a Public Lobby based on the <paramref name="hostId"/> given.
-        /// </summary>
-        /// <param name="hostId"></param>
-        public static void JoinPublicLobby(ushort hostId)
-        {
-            string serverIp = RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue();
-            if (string.IsNullOrEmpty(serverIp)) 
-            {
-                FusionNotifier.Send(new FusionNotification()
-                {
-                    title = "No Server IP",
-                    showTitleOnPopup = false,
-                    message = $"You have no Public Lobby IP to join! Add one in Riptide Settings!",
-                    isMenuItem = false,
-                    isPopup = true,
-                    popupLength = 5f,
-                    type = NotificationType.ERROR
-                });
-            }
-
-            if (IsConnecting)
-            {
-                FusionNotifier.Send(new FusionNotification()
-                {
-                    title = "Already Connecting",
-                    showTitleOnPopup = false,
-                    message = $"Already connecting to a server!",
-                    isMenuItem = false,
-                    isPopup = true,
-                    popupLength = 5f,
-                    type = NotificationType.ERROR
-                });
-            }
-        }
-
         private static void OnConnectToP2PServer(object sender, EventArgs e)
         {
             CurrentClient.Connected -= OnConnectToP2PServer;
@@ -173,6 +137,42 @@ namespace LabFusion.Riptide
         public static void OnDisconnectFromServer(object sender, DisconnectedEventArgs args)
         {
             InternalServerHelpers.OnDisconnect();
+        }
+
+        /// <summary>
+        /// Connects to a Public Lobby based on the <paramref name="hostId"/> given.
+        /// </summary>
+        /// <param name="hostId"></param>
+        public static void JoinPublicLobby(ushort hostId)
+        {
+            string serverIp = RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue();
+            if (string.IsNullOrEmpty(serverIp))
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    title = "No Server IP",
+                    showTitleOnPopup = false,
+                    message = $"You have no Public Lobby IP to join! Add one in Riptide Settings!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
+            }
+
+            if (IsConnecting)
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    title = "Already Connecting",
+                    showTitleOnPopup = false,
+                    message = $"Already connecting to a server!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
+            }
         }
 
         /// <summary>

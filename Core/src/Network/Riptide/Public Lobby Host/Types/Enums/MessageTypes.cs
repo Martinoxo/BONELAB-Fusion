@@ -20,5 +20,6 @@ namespace LobbyHost.Types
         public const ushort UpdateLobby = 12;
 
         public const ushort RequestLobbies = 100;
+        public const ushort FinishLobbySending = 101;
     }
 }

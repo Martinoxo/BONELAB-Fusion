@@ -39,25 +39,8 @@ namespace LabFusion.Riptide
         internal override bool IsClient => CheckIsClient();
         internal override bool IsServer => CheckIsServer();
 
-        /// <summary>
-        /// The ID of the host of a Public Lobby. Returns 0 if not in a Public Lobby or not connected to a server.
-        /// </summary>
-        internal static ushort CurrentHostId
-        {
-            get
-            {
-                if (CurrentServerType != ServerTypes.Public || !CurrentClient.IsConnected)
-                    return 0;
-                else
-                    return CurrentHostId;
-            }
-
-            set
-            {
-                CurrentHostId = value;
-            }
-        }
-
+        private INetworkLobby _currentLobby;
+        internal override INetworkLobby CurrentLobby => _currentLobby;
         private readonly RiptideVoiceManager _voiceManager = new();
         internal override IVoiceManager VoiceManager => _voiceManager;
 
@@ -406,7 +389,7 @@ namespace LabFusion.Riptide
                 case ServerTypes.P2P:
                     return CurrentServer.IsRunning;
                 case ServerTypes.Public:
-                    if (PublicLobbyClient.Id == CurrentHostId)
+                    if (PublicLobbyClient.Id == ushort.Parse(CurrentLobby.GetMetadata("LobbyId")))
                         return true;
                     else
                         return false;
@@ -455,6 +438,7 @@ namespace LabFusion.Riptide
 
         internal override void StartServer() => ServerManagement.StartServer();
 
+        // Am I insane for trying to implement three different networking systems into one layer? Maybe! Do I care? Nop.
         #region Fusion Messaging
         #region BROADCAST
         internal override void BroadcastMessage(NetworkChannel channel, FusionMessage message)
@@ -464,14 +448,26 @@ namespace LabFusion.Riptide
                 case ServerTypes.P2P:
                     if (IsServer)
                     {
-                        CurrentServer.SendToAll(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel));
+                        CurrentServer.SendToAll(Messages.FusionMessage.CreateFusionMessage(message, channel));
                     }
                     else
                     {
-                        CurrentClient.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), true);
+                        CurrentClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel), true);
                     }
                     break;
                 case ServerTypes.Public:
+                    if (IsServer)
+                    {
+                        var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicBroadcast);
+                        msg.AddUShort(PublicLobbyClient.Id);
+                        PublicLobbyClient.Send(msg, false);
+                    }
+                    else
+                    {
+                        var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendToServer);
+                        msg.AddUShort(ushort.Parse(CurrentLobby.GetMetadata("LobbyId")));
+                        PublicLobbyClient.Send(msg, false);
+                    }
                     break;
                 case ServerTypes.Dedicated:
                     break;
@@ -487,6 +483,9 @@ namespace LabFusion.Riptide
                     CurrentClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel));
                     break;
                 case ServerTypes.Public:
+                    var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendToServer);
+                    msg.AddUShort(ushort.Parse(CurrentLobby.GetMetadata("LobbyId")));
+                    PublicLobbyClient.Send(msg, false);
                     break;
                 case ServerTypes.Dedicated:
                     break;
@@ -513,15 +512,21 @@ namespace LabFusion.Riptide
                         Connection client;
                         if (userId == PlayerIdManager.LocalLongId)
                         {
-                            CurrentServer.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), (ushort)PlayerIdManager.LocalLongId);
+                            CurrentServer.Send(Messages.FusionMessage.CreateFusionMessage(message, channel), (ushort)PlayerIdManager.LocalLongId);
                         }
                         else if (CurrentServer.TryGetClient((ushort)userId, out client))
                         {
-                            CurrentServer.Send(Riptide.Messages.FusionMessage.CreateFusionMessage(message, channel), client, true);
+                            CurrentServer.Send(Messages.FusionMessage.CreateFusionMessage(message, channel), client, true);
                         }
                     }
                     break;
                 case ServerTypes.Public:
+                    if (IsServer)
+                    {
+                        var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendFromServer);
+                        msg.AddUShort((ushort)userId);
+                        PublicLobbyClient.Send(msg, false);
+                    }
                     break;
                 case ServerTypes.Dedicated:
                     break;

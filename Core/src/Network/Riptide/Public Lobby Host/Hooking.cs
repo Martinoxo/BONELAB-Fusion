@@ -19,11 +19,11 @@ namespace LobbyHost
             if (args.IsHost)
             {
 
-                TUIManager.RefreshUi($"Lobby with Host ID {args.Lobby.LobbyInfo.HostId} closed.");
+                TUIManager.RefreshUi($"Lobby with Host ID {args.Lobby.HostId} closed.");
             } else
             {
 
-                TUIManager.RefreshUi($"Client with ID {e.Client.Id} disconnected from lobby with Host ID {args.Lobby.LobbyInfo.HostId}");
+                TUIManager.RefreshUi($"Client with ID {e.Client.Id} disconnected from lobby with Host ID {args.Lobby.HostId}");
             }
         }
 
