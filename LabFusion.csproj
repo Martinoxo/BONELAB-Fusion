@@ -921,7 +921,7 @@
     </Reference>
     <Reference Include="RiptideNetworking, Version=2.1.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>Core\managed\RiptideNetworking.dll</HintPath>
+      <HintPath>Core\src\Network\Riptide\resources\lib\RiptideNetworking.dll</HintPath>
     </Reference>
     <Reference Include="SLZ.Algorithms, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
