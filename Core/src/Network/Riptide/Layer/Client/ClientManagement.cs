@@ -13,6 +13,8 @@ using LabFusion.Network;
 using System.Drawing;
 using System.Runtime.Remoting.Messaging;
 using LabFusion.Riptide.Preferences;
+using LabFusion.Riptide.Messages;
+using System.Net;
 
 namespace LabFusion.Riptide
 {
@@ -151,7 +153,7 @@ namespace LabFusion.Riptide
                 FusionNotifier.Send(new FusionNotification()
                 {
                     title = "No Server IP",
-                    showTitleOnPopup = false,
+                    showTitleOnPopup = true,
                     message = $"You have no Public Lobby IP to join! Add one in Riptide Settings!",
                     isMenuItem = false,
                     isPopup = true,
@@ -160,19 +162,104 @@ namespace LabFusion.Riptide
                 });
             }
 
-            if (IsConnecting)
+            if (!IPAddress.TryParse(serverIp, out var ip))
             {
                 FusionNotifier.Send(new FusionNotification()
                 {
-                    title = "Already Connecting",
-                    showTitleOnPopup = false,
-                    message = $"Already connecting to a server!",
+                    title = "Invalid Server IP",
+                    showTitleOnPopup = true,
+                    message = $"The Public Lobby IP you entered is invalid!",
                     isMenuItem = false,
                     isPopup = true,
                     popupLength = 5f,
                     type = NotificationType.ERROR
                 });
             }
+
+            if (PublicLobbyClient.IsConnected)
+                PublicLobbyClient.Disconnect();
+
+            EventHandler onConnect = null;
+            onConnect = (sender, e) =>
+            {
+                RiptideNetworkLayer.HostId = hostId;
+
+                RiptideNetworkLayer.CurrentServerType = ServerTypes.Public;
+
+                PlayerIdManager.SetLongId(CurrentClient.Id);
+
+                ConnectionSender.SendConnectionRequest();
+
+                InternalLayerHelpers.OnUpdateLobby();
+
+                PublicLobbyClient.Connected -= onConnect;
+            };
+
+            PublicLobbyClient.Connected += onConnect;
+            PublicLobbyClient.Connect($"{serverIp}:6666", 5, 0, null, false);
+        }
+
+        public static void CreatePublicLobby()
+        {
+            string serverIp = RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue();
+            if (string.IsNullOrEmpty(serverIp))
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    title = "No Server IP",
+                    showTitleOnPopup = true,
+                    message = $"You have no Public Lobby IP to join! Add one in Riptide Settings!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
+            }
+
+            if (!IPAddress.TryParse(serverIp, out var ip))
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    title = "Invalid Server IP",
+                    showTitleOnPopup = true,
+                    message = $"The Public Lobby IP you entered is invalid!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
+            }
+
+            if (PublicLobbyClient.IsConnected)
+                PublicLobbyClient.Disconnect();
+
+
+            EventHandler onConnect = null;
+            onConnect = (sender, e) =>
+            {
+                PublicLobbyClient.Send(PublicLobbyMessage.CreatePublicLobbyMessage());
+                PublicLobbyClient.Connected -= onConnect;
+            };
+
+            PublicLobbyClient.Connected += onConnect;
+            PublicLobbyClient.Connect($"{serverIp}:6666", 5, 0, null, false);
+        }
+
+        private static void HandleCreateLobbyMessage()
+        {
+            RiptideNetworkLayer.HostId = PublicLobbyClient.Id;
+
+            RiptideNetworkLayer.CurrentServerType = ServerTypes.Public;
+
+            PublicLobbyClient.TimeoutTime = 30000;
+            PublicLobbyClient.Connection.CanQualityDisconnect = false;
+
+            PlayerIdManager.SetLongId(PublicLobbyClient.Id);
+
+            // Call server setup
+            InternalServerHelpers.OnStartServer();
+
+            InternalLayerHelpers.OnUpdateLobby();
         }
 
         /// <summary>
@@ -187,6 +274,16 @@ namespace LabFusion.Riptide
                 case MessageTypes.FusionMessage:
                     {
                         FusionMessageHandler.ReadMessage(args.Message.GetBytes());
+                        break;
+                    }
+                case MessageTypes.RequestLobbies:
+                    {
+                        RiptideNetworkLayer.LobbyManager.HandleRiptideMessage(args.Message);
+                        break;
+                    }
+                case MessageTypes.CreateLobby:
+                    {
+                        HandleCreateLobbyMessage();
                         break;
                     }
             }

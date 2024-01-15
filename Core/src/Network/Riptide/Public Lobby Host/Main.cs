@@ -20,18 +20,31 @@ namespace LobbyHost
             Server.ClientConnected += Hooking.OnClientConnected;
             Server.ClientDisconnected += Hooking.OnClientDisconnected;
             Server.MessageReceived += Hooking.OnMessageReceived;
-            Server.Start(6666, 30);
+            Server.Start(6666, 30, 0, false);
 
             System.Timers.Timer riptideTimer = new(5);
             riptideTimer.Elapsed += RiptideTick;
-            riptideTimer.Start();
+            riptideTimer.AutoReset = true;
+            riptideTimer.Enabled = true;
 
-            TUIManager.RefreshUi();
+#if DEBUG
+            RiptideLogger.Initialize(TUIManager.RefreshUi, true);
+#endif
+
+            TUIManager.RefreshUi("Type close to exit...");
+            Console.ReadKey();
         }
 
         private static void RiptideTick(object? sender, ElapsedEventArgs e)
         {
-            Server.Update();
+            try
+            {
+                Server.Update();
+            }
+            catch (Exception ex)
+            {
+                TUIManager.RefreshUi($"Failed to update Server with exception: {ex.Message}");
+            }
         }
     }
 }

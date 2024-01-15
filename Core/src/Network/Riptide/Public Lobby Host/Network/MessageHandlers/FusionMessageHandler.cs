@@ -38,7 +38,7 @@ namespace LobbyHost.MessageHandlers
             ushort hostId = message.GetUShort();
             MessageSendMode channel = message.SendMode;
 
-            var lobby = Lobby.GetLobby(hostId);
+            var lobby = Lobby.GetHostLobby(hostId);
             if (lobby == null)
                 return;
 

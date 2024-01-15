@@ -20,7 +20,7 @@ namespace LabFusion.Riptide.Messages
         /// <param name="message"></param>
         /// <param name="channel"></param>
         /// <returns></returns>
-        public static Message CreateFusionMessage(LabFusion.Network.FusionMessage message, NetworkChannel channel, ushort messageId = 0)
+        public static Message CreateFusionMessage(Network.FusionMessage message, NetworkChannel channel, ushort messageId = 0)
         {
             return Message.Create(ConvertSendMode(channel), messageId).AddBytes(message.ToByteArray());
         }

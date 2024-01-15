@@ -10,10 +10,12 @@ namespace LabFusion.Riptide
     public class RiptideLobby : NetworkLobby
     {
         public List<KeyValuePair<string, string>> Metadata = new List<KeyValuePair<string, string>>();
+        public ushort HostId;
 
-        public RiptideLobby(List<KeyValuePair<string, string>> metadata)
+        public RiptideLobby(List<KeyValuePair<string, string>> metadata, ushort hostId)
         {
             Metadata = metadata;
+            HostId = hostId;
         }
 
         public override Action CreateJoinDelegate(ulong lobbyId)
@@ -36,15 +38,14 @@ namespace LabFusion.Riptide
         {
             KeyValuePair<string, string> keyPair = new KeyValuePair<string, string>(key, value);
 
-            foreach (var pair in Metadata)
-            {
-                if (pair.Key == key)
-                {
-                    Metadata.Remove(pair);
-                }
-            }
+            Metadata.RemoveAll(pair => pair.Key == key);
 
             Metadata.Add(keyPair);
+
+            if (ClientManagement.PublicLobbyClient.IsConnected)
+                ClientManagement.PublicLobbyClient.Send(Messages.PublicLobbyMessage.CreateUpdateLobbyMessage(key, value));
+
+            SaveKey(key);
         }
 
         public override bool TryGetMetadata(string key, out string value)

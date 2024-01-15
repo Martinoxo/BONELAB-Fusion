@@ -15,16 +15,37 @@ namespace LobbyHost.Types
 
         public Lobby(Connection hostConnetcion)
         {
-            HostId = hostConnetcion.Id;
+            if (hostConnetcion != null)
+            {
+                HostId = hostConnetcion.Id;
+                Clients.Add(hostConnetcion);
+            }
+
         }
 
-        internal static Lobby GetLobby(ushort hostId)
+        internal static Lobby GetHostLobby(ushort hostId)
         {
             foreach (var lobby in Core.CurrentLobbies)
             {
                 if (lobby.HostId == hostId)
                 {
                     return lobby;
+                }
+            }
+
+            return null;
+        }
+
+        internal static Lobby GetLobby(ushort clientId)
+        {
+            foreach (var lobby in Core.CurrentLobbies)
+            {
+                foreach (var client in lobby.Clients)
+                {
+                    if (client.Id == clientId)
+                    {
+                        return lobby;
+                    }
                 }
             }
 

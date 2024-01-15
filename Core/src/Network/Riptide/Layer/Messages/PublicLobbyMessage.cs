@@ -14,5 +14,23 @@ namespace LabFusion.Riptide.Messages
         {
             return Message.Create(MessageSendMode.Reliable, MessageTypes.RequestLobbies);
         }
+
+        public static Message CreatePublicLobbyMessage()
+        {
+            return Message.Create(MessageSendMode.Reliable, MessageTypes.CreateLobby);
+        }
+
+        public static Message CreateUpdateLobbyMessage(string key, string data)
+        {
+            var message = Message.Create(MessageSendMode.Reliable, MessageTypes.UpdateLobby);
+            message.AddString(key);
+            message.AddString(data);
+            return message;
+        }
+
+        public static void HandleDisconnectMessage(Message message)
+        {
+
+        }
     }
 }

@@ -14,22 +14,26 @@ namespace LobbyHost
     {
         internal static void OnClientDisconnected(object? sender, ServerDisconnectedEventArgs e)
         {
-            var args = Lobby.GetDisconnectArgs(e.Client);
+            var lobby = Lobby.GetLobby(e.Client.Id);
 
-            if (args.IsHost)
+            if (lobby == null)
+                return;
+
+            if (lobby.HostId == e.Client.Id)
             {
-
-                TUIManager.RefreshUi($"Lobby with Host ID {args.Lobby.HostId} closed.");
+                Core.CurrentLobbies.Remove(lobby);
+                TUIManager.RefreshUi($"Lobby with Host ID {lobby.HostId} closed.");
             } else
             {
 
-                TUIManager.RefreshUi($"Client with ID {e.Client.Id} disconnected from lobby with Host ID {args.Lobby.HostId}");
+                TUIManager.RefreshUi($"Client with ID {e.Client.Id} disconnected from lobby with Host ID {lobby.HostId}");
             }
         }
 
         internal static void OnClientConnected(object? sender, ServerConnectedEventArgs e)
         {
-            
+            e.Client.TimeoutTime = 30000;
+            e.Client.CanQualityDisconnect = false;
         }
 
         internal static void OnMessageReceived(object? sender, MessageReceivedEventArgs e)

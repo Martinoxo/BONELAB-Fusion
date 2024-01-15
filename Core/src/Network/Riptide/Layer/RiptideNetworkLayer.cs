@@ -27,6 +27,8 @@ using LabFusion.Grabbables;
 using SLZ.Interaction;
 using SLZ.Marrow.Data;
 using SLZ.Props;
+using BoneLib.BoneMenu;
+using System.Collections;
 
 namespace LabFusion.Riptide
 {
@@ -34,24 +36,27 @@ namespace LabFusion.Riptide
     {
         public static readonly string TideFusionPath = $"{MelonUtils.UserDataDirectory}/TideFusion";
 
-        public static ServerTypes CurrentServerType = ServerTypes.None;
+        internal static ServerTypes CurrentServerType = ServerTypes.None;
+
+        internal static ushort HostId = 0;
 
         internal override bool IsClient => CheckIsClient();
         internal override bool IsServer => CheckIsServer();
 
-        private INetworkLobby _currentLobby;
+        private RiptideLobby _currentLobby = new RiptideLobby(new List<KeyValuePair<string, string>>(), 0);
         internal override INetworkLobby CurrentLobby => _currentLobby;
         private readonly RiptideVoiceManager _voiceManager = new();
         internal override IVoiceManager VoiceManager => _voiceManager;
+
+        public static RiptideLobbyManager LobbyManager = new();
 
         internal override string Title => "Riptide";
 
         internal override bool CheckSupported() => true;
 
-        internal override bool CheckValidation()
-        {
-            return true;
-        }
+        internal override bool CheckValidation() => true;
+
+        internal override bool IsFriend(ulong userId) => false;
 
         internal override void OnInitializeLayer()
         {
@@ -84,15 +89,23 @@ namespace LabFusion.Riptide
             CurrentServer.ClientConnected += OnClientConnect;
             CurrentClient.Disconnected += OnDisconnectFromServer;
             CurrentClient.ConnectionFailed += OnConnectionFail;
+            PublicLobbyClient.Disconnected += OnDisconnectFromLobby;
 
             // Riptide Messages
             CurrentServer.MessageReceived += ServerManagement.OnMessageReceived;
             CurrentClient.MessageReceived += ClientManagement.OnMessageReceived;
+            PublicLobbyClient.MessageReceived += ClientManagement.OnMessageReceived;
 
             // Add Server Hooks
             MultiplayerHooking.OnPlayerJoin += OnPlayerJoin;
             MultiplayerHooking.OnPlayerLeave += OnPlayerLeave;
             MultiplayerHooking.OnDisconnect += OnDisconnect;
+        }
+
+        private void OnDisconnectFromLobby(object sender, DisconnectedEventArgs e)
+        {
+            if (CurrentServerType == ServerTypes.Public && FusionPreferences.ReceivedServerSettings != null || PlayerIdManager.LocalLongId == HostId)
+                InternalServerHelpers.OnDisconnect();
         }
 
         private void OnPlayerJoin(PlayerId id)
@@ -171,6 +184,7 @@ namespace LabFusion.Riptide
         {
             // Create the basic options
             CreateMatchmakingMenu(category);
+            CreateRiptideMenu(category);
             BoneMenuCreator.CreateGamemodesMenu(category);
             BoneMenuCreator.CreateSettingsMenu(category);
             BoneMenuCreator.CreateNotificationsMenu(category);
@@ -195,29 +209,30 @@ namespace LabFusion.Riptide
             // Root category
             var matchmaking = category.CreateCategory("Matchmaking", Color.red);
 
-            var _p2pMatchmakingCategory = matchmaking.CreateCategory("P2P Matchmaking", Color.white);
+            // Server info
+            var serverInfo = matchmaking.CreateCategory("Server Info", Color.white);
+            BoneMenuCreator.PopulateServerInfo(serverInfo);
 
-            // Server making
-            _p2pServerInfoCategory = _p2pMatchmakingCategory.CreateCategory("Server Info", Color.white);
-            CreateServerInfoMenu(_p2pServerInfoCategory);
+            // P2P Server
+            CreateP2PServerMenu(matchmaking);
 
-            // Manual joining
-            _p2pManualJoiningCategory = _p2pMatchmakingCategory.CreateCategory("Manual Joining", Color.white);
-            CreateP2PManualJoiningMenu(_p2pManualJoiningCategory);
-
-            // Server Listings
-            ServerListingCategory.CreateServerListingCategory(_p2pMatchmakingCategory);
+            // Public Lobbies
+            CreatePublicLobbyCategory(matchmaking);
         }
 
+        private Keyboard _publicLobbyIpKeyboard;
         private FunctionElement _activeMicrophoneElement;
         private MenuCategory _microphoneSettingsCategory;
         private MenuCategory _microphoneCategory;
         private List<FunctionElement> _microphoneElements = new List<FunctionElement>();
+
         private void CreateRiptideMenu(MenuCategory category)
         {
-            var riptideMenu = category.CreateCategory("Riptide Settings", Color.cyan);
-            
-            _microphoneSettingsCategory = riptideMenu.CreateCategory("Microphone Settings", Color.white);
+            var riptideMenu = category.CreateCategory("Riptide Settings", Color.blue);
+
+            _publicLobbyIpKeyboard = Keyboard.CreateKeyboard(riptideMenu, $"Public Lobby IP:\n{RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue()}", (ip) => OnChangePublicLobbyIp(ip, riptideMenu));
+
+            /*_microphoneSettingsCategory = riptideMenu.CreateCategory("Microphone Settings", Color.white);
             _activeMicrophoneElement = _microphoneSettingsCategory.CreateFunctionElement($"Active Microphone: \n{Microphone.devices[0]}", Color.white, null);
             _microphoneCategory = _microphoneSettingsCategory.CreateCategory("Change Microphone", Color.white);
             _microphoneCategory.CreateFunctionElement("Refresh Microphones", Color.cyan, () => OnClickRefreshMicrophones());
@@ -225,11 +240,31 @@ namespace LabFusion.Riptide
             {
                 var microphoneElement = _microphoneCategory.CreateFunctionElement(inputDevice, Color.white, () => OnSetMicrophone(inputDevice));
                 _microphoneElements.Add(microphoneElement);
-            }
+            }*/
 
 #if DEBUG
             CreateRiptideDebugMenu(riptideMenu);
 #endif
+        }
+
+        private void OnChangePublicLobbyIp(string ip, MenuCategory categoryToSwitchTo)
+        {
+            if (!PublicLobbyClient.IsConnected && !PublicLobbyClient.IsConnecting)
+            {
+                RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.SetValue(ip);
+                _publicLobbyIpKeyboard.Category.SetName($"Public Lobby IP:\n{RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue()}");
+            } else
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    showTitleOnPopup = false,
+                    message = "Cannot change IP whilst PublicLobbyClient is connected!",
+                    isMenuItem = false,
+                    isPopup = true,
+                });
+            }
+
+            MenuManager.SelectCategory(categoryToSwitchTo);
         }
 
         private void OnClickRefreshMicrophones()
@@ -261,17 +296,135 @@ namespace LabFusion.Riptide
 
         private FunctionElement _createServerElement;
         private Keyboard _serverPortKeyboard;
-
-        private void CreateServerInfoMenu(MenuCategory category)
+        private void CreateP2PServerMenu(MenuCategory category)
         {
-            _createServerElement = category.CreateFunctionElement("Start P2P Server", Color.green, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host!");
+            var p2pServerMenu = category.CreateCategory("P2P", Color.white);
 
-            var p2pServerSettingsMenu = category.CreateCategory("Riptide Server Settings", Color.cyan);
+            // Hosting
+            var p2pHostingMenu = p2pServerMenu.CreateCategory("Hosting", Color.white);
+            _createServerElement = p2pHostingMenu.CreateFunctionElement("Start P2P Server", Color.green, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host!");
+            var p2pServerSettingsMenu = p2pHostingMenu.CreateCategory("Riptide Server Settings", Color.cyan);
             _serverPortKeyboard = Keyboard.CreateKeyboard(p2pServerSettingsMenu, $"Server Port:\n{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}", (port) => OnChangeServerPort(port));
+            p2pHostingMenu.CreateFunctionElement("Display Server Code", Color.white, () => OnDislayServerCode());
 
-            category.CreateFunctionElement("Display Server Code", Color.white, () => OnDislayServerCode());
+            // joining
+            var manualJoining = p2pServerMenu.CreateCategory("Joining", Color.white);
+            CreateP2PManualJoiningMenu(manualJoining);
 
-            BoneMenuCreator.PopulateServerInfo(category);
+            // Server Listings
+            ServerListingCategory.CreateServerListingCategory(p2pServerMenu);
+        }
+
+        private MenuCategory _publicLobbiesCategory;
+        private void CreatePublicLobbyCategory(MenuCategory category)
+        {
+            var publicLobbyCategory = category.CreateCategory("Public Lobbies", Color.white);
+
+            publicLobbyCategory.CreateFunctionElement("Create Lobby", Color.green, () => CreatePublicLobby());
+
+            // Public lobbies list
+            _publicLobbiesCategory = publicLobbyCategory.CreateCategory("Lobby List", Color.white);
+            _publicLobbiesCategory.CreateFunctionElement("Refresh", Color.white, Menu_RefreshPublicLobbies);
+            _publicLobbiesCategory.CreateFunctionElement("Select Refresh to load servers!", Color.yellow, null);
+        }
+
+        private LobbySortMode _publicLobbySortMode = LobbySortMode.LEVEL;
+        private bool _isPublicLobbySearching = false;
+
+        private void Menu_RefreshPublicLobbies()
+        {
+            // Make sure we arent already searching
+            if (_isPublicLobbySearching)
+                return;
+
+            // Clear existing lobbies
+            _publicLobbiesCategory.Elements.Clear();
+            _publicLobbiesCategory.CreateFunctionElement("Refresh", Color.white, Menu_RefreshPublicLobbies);
+            _publicLobbiesCategory.CreateEnumElement("Sort By", Color.white, _publicLobbySortMode, (v) =>
+            {
+                _publicLobbySortMode = v;
+                Menu_RefreshPublicLobbies();
+            });
+
+            MelonCoroutines.Start(CoAwaitLobbyListRoutine());
+        }
+
+        private IEnumerator CoAwaitLobbyListRoutine()
+        {
+            _isPublicLobbySearching = true;
+            LobbySortMode sortMode = _publicLobbySortMode;
+
+            // Fetch lobbies
+            var task = LobbyManager.RequestLobbies();
+
+            float timeTaken = 0f;
+
+            while (!task.IsCompleted)
+            {
+                yield return null;
+                timeTaken += TimeUtilities.DeltaTime;
+
+                if (timeTaken >= 20f || !PublicLobbyClient.IsConnected && !PublicLobbyClient.IsConnecting)
+                {
+                    FusionNotifier.Send(new FusionNotification()
+                    {
+                        title = "Timed Out",
+                        showTitleOnPopup = true,
+                        message = "Timed out when requesting lobbies. Is the Public Lobby Host running?",
+                        isMenuItem = false,
+                        isPopup = true,
+                    });
+                    _isPublicLobbySearching = false;
+                    yield break;
+                }
+            }
+
+
+            var lobbies = task.Result;
+
+            foreach (var lobby in lobbies)
+            {
+                var info = LobbyMetadataInfo.Read(lobby);
+                FusionLogger.Log("Got lobby: " + info.LobbyId);
+                FusionLogger.Log("Lobby has " + lobby.Metadata.Count + " metadata entries");
+            }
+
+            using (BatchedBoneMenu.Create())
+            {
+                foreach (var lobby in lobbies)
+                {
+                    var info = LobbyMetadataInfo.Read(lobby);
+                    if (Internal_CanShowLobby(info))
+                    {
+                        BoneMenuCreator.CreateLobby(_publicLobbiesCategory, info, lobby, sortMode);
+                    }
+                }
+            }
+
+            // Select the updated category
+            MenuManager.SelectCategory(_publicLobbiesCategory);
+
+            _isPublicLobbySearching = false;
+        }
+
+        private bool Internal_CanShowLobby(LobbyMetadataInfo info)
+        {
+            // Make sure the lobby is actually open
+            if (!info.HasServerOpen)
+                return false;
+
+            // Decide if this server is too private
+            switch (info.Privacy)
+            {
+                default:
+                case ServerPrivacy.LOCKED:
+                case ServerPrivacy.PRIVATE:
+                    return false;
+                case ServerPrivacy.PUBLIC:
+                    return true;
+                case ServerPrivacy.FRIENDS_ONLY:
+                    return IsFriend(info.LobbyId);
+            }
         }
 
         private void OnDislayServerCode()
@@ -389,7 +542,7 @@ namespace LabFusion.Riptide
                 case ServerTypes.P2P:
                     return CurrentServer.IsRunning;
                 case ServerTypes.Public:
-                    if (PublicLobbyClient.Id == ushort.Parse(CurrentLobby.GetMetadata("LobbyId")))
+                    if (PublicLobbyClient.Id == HostId)
                         return true;
                     else
                         return false;
@@ -409,6 +562,18 @@ namespace LabFusion.Riptide
 
         internal override void OnUpdateLobby()
         {
+            // Make sure the lobby exists
+            if (CurrentLobby == null)
+            {
+#if DEBUG
+                FusionLogger.Warn("Tried updating the riptide lobby, but it was null!");
+#endif
+                return;
+            }
+
+            // Write active info about the lobby
+            LobbyMetadataHelper.WriteInfo(CurrentLobby);
+
             // Update bonemenu items
             OnUpdateCreateServerText();
         }
@@ -465,7 +630,7 @@ namespace LabFusion.Riptide
                     else
                     {
                         var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendToServer);
-                        msg.AddUShort(ushort.Parse(CurrentLobby.GetMetadata("LobbyId")));
+                        msg.AddUShort(HostId);
                         PublicLobbyClient.Send(msg, false);
                     }
                     break;
@@ -484,7 +649,7 @@ namespace LabFusion.Riptide
                     break;
                 case ServerTypes.Public:
                     var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendToServer);
-                    msg.AddUShort(ushort.Parse(CurrentLobby.GetMetadata("LobbyId")));
+                    msg.AddUShort(HostId);
                     PublicLobbyClient.Send(msg, false);
                     break;
                 case ServerTypes.Dedicated:

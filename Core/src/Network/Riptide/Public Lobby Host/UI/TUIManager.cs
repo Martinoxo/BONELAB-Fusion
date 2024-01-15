@@ -27,9 +27,6 @@ namespace LobbyHost.UI
                 $"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 $"{info}\n" +
                 $"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
-
-            string input = Console.ReadLine();
-            RefreshUi(input);
         }
     }
 }
