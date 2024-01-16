@@ -12,7 +12,7 @@ namespace LobbyHost.UI
     {
         internal static void RefreshUi(string info = "")
         {
-            /*Console.Clear();
+            Console.Clear();
 
             Console.WriteLine($"Info:\n" +
                 $"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
@@ -26,8 +26,9 @@ namespace LobbyHost.UI
             Console.WriteLine($"Output:\n" +
                 $"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n" +
                 $"{info}\n" +
-                $"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");*/
-            Console.WriteLine(info);
+                $"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
+
+            Console.WriteLine("Press any key to close.");
         }
     }
 }

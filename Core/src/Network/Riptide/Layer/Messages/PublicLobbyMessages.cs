@@ -8,7 +8,7 @@ using Riptide;
 
 namespace LabFusion.Riptide.Messages
 {
-    public class PublicLobbyMessage
+    public class PublicLobbyMessages
     {
         public static Message CreateRequestLobbiesMessage()
         {
@@ -18,6 +18,11 @@ namespace LabFusion.Riptide.Messages
         public static Message CreatePublicLobbyMessage()
         {
             return Message.Create(MessageSendMode.Reliable, MessageTypes.CreateLobby);
+        }
+
+        public static Message CreateJoinPublicLobbyMessage(ushort hostId)
+        {
+            return Message.Create(MessageSendMode.Reliable, MessageTypes.JoinLobby).AddUShort(hostId);
         }
 
         public static Message CreateUpdateLobbyMessage(string key, string data)

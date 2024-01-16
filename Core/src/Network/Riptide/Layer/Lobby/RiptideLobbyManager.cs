@@ -30,6 +30,13 @@ namespace LabFusion.Riptide
 #if DEBUG
             FusionLogger.Log($"Got {lobbyCount} lobbies");
 #endif
+            if (lobbyCount == 0)
+            {
+                _lobbySource.SetResult(new RiptideLobby[0]);
+                _lobbySource = null;
+                _lobbies = new();
+                return;
+            }
 
             ushort hostId = message.GetUShort();
             int metadataCount = message.GetInt();
@@ -64,14 +71,14 @@ namespace LabFusion.Riptide
             _lobbySource = new TaskCompletionSource<RiptideLobby[]>();
 
             if (ClientManagement.PublicLobbyClient.IsConnected)
-                ClientManagement.PublicLobbyClient.Send(Messages.PublicLobbyMessage.CreateRequestLobbiesMessage());
+                ClientManagement.PublicLobbyClient.Send(Messages.PublicLobbyMessages.CreateRequestLobbiesMessage());
             else
             {
                 ClientManagement.PublicLobbyClient.Connected += (x, y) =>
                 {
-                    ClientManagement.PublicLobbyClient.Send(Messages.PublicLobbyMessage.CreateRequestLobbiesMessage());
+                    ClientManagement.PublicLobbyClient.Send(Messages.PublicLobbyMessages.CreateRequestLobbiesMessage());
                 };
-                ClientManagement.PublicLobbyClient.Connect($"{RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue()}:6666", 5, 0, Messages.PublicLobbyMessage.CreateRequestLobbiesMessage(), false);
+                ClientManagement.PublicLobbyClient.Connect($"{RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue()}:6666", 5, 0, Messages.PublicLobbyMessages.CreateRequestLobbiesMessage(), false);
             }
 
             return _lobbySource.Task;

@@ -44,7 +44,7 @@ namespace LabFusion.Riptide
             Metadata.Add(keyPair);
 
             if (ClientManagement.PublicLobbyClient.IsConnected)
-                ClientManagement.PublicLobbyClient.Send(Messages.PublicLobbyMessage.CreateUpdateLobbyMessage(key, value));
+                ClientManagement.PublicLobbyClient.Send(Messages.PublicLobbyMessages.CreateUpdateLobbyMessage(key, value));
 
             SaveKey(key);
         }

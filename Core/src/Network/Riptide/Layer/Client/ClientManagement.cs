@@ -89,8 +89,6 @@ namespace LabFusion.Riptide
             if (!code.Contains("."))
                 code = IPExtensions.DecodeIpAddress(codeInt);
 
-            
-
             CurrentClient.Connected += OnConnectToP2PServer;
 
             CurrentClient.Connect($"{code}:{port}", 5, 0, null, false);
@@ -175,17 +173,16 @@ namespace LabFusion.Riptide
 
             RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.Public);
 
-            if (PublicLobbyClient.IsConnected && RiptideNetworkLayer.HostId != 0)
-            {
-                InternalServerHelpers.OnDisconnect();
+            if (InternalLayerHelpers.CurrentNetworkLayer.IsClient)
+                NetworkHelper.Disconnect();
 
+            if (InternalLayerHelpers.CurrentNetworkLayer.IsClient)
+            {
                 RiptideNetworkLayer.HostId = hostId;
 
                 PlayerIdManager.SetLongId(PublicLobbyClient.Id);
 
-                ConnectionSender.SendConnectionRequest();
-
-                InternalLayerHelpers.OnUpdateLobby();
+                PublicLobbyClient.Send(PublicLobbyMessages.CreateJoinPublicLobbyMessage(hostId));
             } else
             {
                 void OnConnect(object sender, EventArgs e)
@@ -197,9 +194,7 @@ namespace LabFusion.Riptide
 
                     PlayerIdManager.SetLongId(PublicLobbyClient.Id);
 
-                    ConnectionSender.SendConnectionRequest();
-
-                    InternalLayerHelpers.OnUpdateLobby();
+                    var msg = PublicLobbyMessages.CreateJoinPublicLobbyMessage(hostId);
                 }
 
                 PublicLobbyClient.Connected += OnConnect;
@@ -218,21 +213,7 @@ namespace LabFusion.Riptide
             {
                 case MessageTypes.FusionMessage:
                     {
-                        switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
-                        {
-                            case ServerTypes.P2P:
-                                {
-                                    FusionMessageHandler.ReadMessage(args.Message.GetBytes());
-                                    break;
-                                }
-                            case ServerTypes.Public:
-                                {
-                                    var bytes = args.Message.GetBytes();
-                                    var isHost = args.Message.GetBool();
-                                    FusionMessageHandler.ReadMessage(bytes, isHost);
-                                    break;
-                                }
-                        }
+                        Messages.FusionMessage.HandleClientFusionMessage(args.Message);
                         break;
                     }
                 case MessageTypes.RequestLobbies:
@@ -243,6 +224,35 @@ namespace LabFusion.Riptide
                 case MessageTypes.CreateLobby:
                     {
                         ServerManagement.HandleCreateLobbyMessage();
+                        break;
+                    }
+                case MessageTypes.LobbyPlayerDisconnect:
+                    {
+                        bool hostDisconnected = args.Message.GetBool();
+                        ushort id = args.Message.GetUShort();
+
+                        if (hostDisconnected)
+                        {
+                            NetworkHelper.Disconnect("Host Disconnected");
+                        } else
+                        {
+                            // Make sure the user hasn't previously disconnected
+                            if (PlayerIdManager.HasPlayerId(id))
+                            {
+                                // Update the mod so it knows this user has left
+                                InternalServerHelpers.OnUserLeave(id);
+
+                                // Send disconnect notif to everyone
+                                ConnectionSender.SendDisconnect(id);
+                            }
+                        }
+                        break;
+                    }
+                case MessageTypes.JoinLobby:
+                    {
+                        ConnectionSender.SendConnectionRequest();
+
+                        InternalLayerHelpers.OnUpdateLobby();
                         break;
                     }
             }

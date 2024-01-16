@@ -31,7 +31,7 @@ namespace LobbyHost
             RiptideLogger.Initialize(TUIManager.RefreshUi, true);
 #endif
 
-            TUIManager.RefreshUi("Type close to exit...");
+            TUIManager.RefreshUi();
             Console.ReadKey();
         }
 

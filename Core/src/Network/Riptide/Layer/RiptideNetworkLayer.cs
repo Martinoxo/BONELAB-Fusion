@@ -90,6 +90,7 @@ namespace LabFusion.Riptide
             CurrentClient.Disconnected += OnDisconnectFromServer;
             CurrentClient.ConnectionFailed += OnConnectionFail;
             PublicLobbyClient.Disconnected += OnDisconnectFromServer;
+            PublicLobbyClient.ConnectionFailed += OnPublicConnectionFail;
 
             // Riptide Messages
             CurrentServer.MessageReceived += ServerManagement.OnMessageReceived;
@@ -101,6 +102,20 @@ namespace LabFusion.Riptide
             MultiplayerHooking.OnPlayerLeave += OnPlayerLeave;
             MultiplayerHooking.OnDisconnect += OnDisconnect;
             MultiplayerHooking.OnServerSettingsChanged += OnUpdateLobby;
+        }
+
+        private void OnPublicConnectionFail(object sender, ConnectionFailedEventArgs e)
+        {
+            FusionNotifier.Send(new FusionNotification()
+            {
+                title = "Connection Failed",
+                showTitleOnPopup = true,
+                message = $"Failed to connect to Public Lobby Host! Is the Host running?",
+                isMenuItem = false,
+                isPopup = true,
+                popupLength = 5f,
+                type = NotificationType.ERROR
+            });
         }
 
         private void OnPlayerJoin(PlayerId id)
@@ -245,6 +260,8 @@ namespace LabFusion.Riptide
                     _serverTypeElement.SetName($"Server Type: \n{RiptidePreferences.LocalServerSettings.ServerType.GetValue()}");
                     break;
             }
+
+            OnUpdateCreateServerText();
         }
 
         private Keyboard _publicLobbyIpKeyboard;
@@ -411,20 +428,16 @@ namespace LabFusion.Riptide
                 }
             }
 
-
             var lobbies = task.Result;
-
-            foreach (var lobby in lobbies)
-            {
-                var info = LobbyMetadataHelper.ReadInfo(lobby);
-                FusionLogger.Log("Got lobby: " + info.LobbyId);
-                FusionLogger.Log("Lobby has " + lobby.Metadata.Count + " metadata entries");
-            }
 
             using (BatchedBoneMenu.Create())
             {
                 foreach (var lobby in lobbies)
                 {
+                    // Hide lobby if it is our own
+                    if (lobby.HostId == PublicLobbyClient.Id)
+                        continue;
+
                     var info = LobbyMetadataHelper.ReadInfo(lobby);
 
                     if (Internal_CanShowLobby(info))
@@ -561,7 +574,7 @@ namespace LabFusion.Riptide
             if (CurrentClient == null || PublicLobbyClient == null)
                 return false;
 
-            return (CurrentClient.IsConnected || PublicLobbyClient.IsConnected);
+            return (CurrentClient.IsConnected || PublicLobbyClient.IsConnected && HostId != 0);
         }
 
         private bool CheckIsServer()

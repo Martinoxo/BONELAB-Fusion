@@ -85,6 +85,7 @@ namespace LabFusion.Riptide
         public static void OnClientConnect(object obj, ServerConnectedEventArgs args)
         {
             args.Client.CanQualityDisconnect = false;
+            args.Client.TimeoutTime = 20000;
         }
 
         public static void CreatePublicLobby()
@@ -125,7 +126,7 @@ namespace LabFusion.Riptide
                 void OnConnect(object sender, EventArgs e)
                 {
                     PublicLobbyClient.Connected -= OnConnect;
-                    PublicLobbyClient.Send(PublicLobbyMessage.CreatePublicLobbyMessage());
+                    PublicLobbyClient.Send(PublicLobbyMessages.CreatePublicLobbyMessage());
                 };
 
                 PublicLobbyClient.Connected += OnConnect;
@@ -133,7 +134,7 @@ namespace LabFusion.Riptide
             }
             else
             {
-                PublicLobbyClient.Send(PublicLobbyMessage.CreatePublicLobbyMessage());
+                PublicLobbyClient.Send(PublicLobbyMessages.CreatePublicLobbyMessage());
             }
         }
 
@@ -163,7 +164,7 @@ namespace LabFusion.Riptide
             {
                 case MessageTypes.FusionMessage:
                     {
-                        FusionMessageHandler.ReadMessage(args.Message.GetBytes(), true);
+                        Messages.FusionMessage.HandleServerFusionMessage(args.Message);
                         break;
                     }
             }

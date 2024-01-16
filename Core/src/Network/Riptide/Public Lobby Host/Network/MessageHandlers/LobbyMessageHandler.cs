@@ -13,6 +13,13 @@ namespace LobbyHost.MessageHandlers
     {
         internal static void HandleRequestLobbies(Message message, Connection client)
         {
+            if (Core.CurrentLobbies.Count == 0)
+            {
+                var response = Message.Create(MessageSendMode.Reliable, (ushort)MessageTypes.RequestLobbies);
+                response.AddInt(0);
+                Core.Server.Send(response, client.Id);
+                return;
+            }
             foreach (var lobby in Core.CurrentLobbies)
             {
                 var lobbyResponse = Message.Create(MessageSendMode.Reliable, (ushort)MessageTypes.RequestLobbies);
@@ -34,7 +41,18 @@ namespace LobbyHost.MessageHandlers
 
         internal static void HandleJoinLobby(Message message, Connection client)
         {
+            ushort hostId = message.GetUShort();
+            var lobby = Lobby.GetHostLobby(hostId);
+            if (lobby != null)
+            {
+                lobby.Clients.Add(client);
 
+                var msg = Message.Create(MessageSendMode.Reliable, MessageTypes.JoinLobby);
+                msg.AddBool(true);
+            } else
+            {
+
+            }
         }
 
         internal static void HandleCreateLobby(Message message, Connection client)
@@ -46,11 +64,6 @@ namespace LobbyHost.MessageHandlers
             Core.Server.Send(response, client.Id);
 
             TUIManager.RefreshUi($"Created lobby with Id {client.Id}");
-        }
-
-        internal static void HandleDeleteLobby(Message message, Connection client)
-        {
-
         }
 
         internal static void HandleUpdateLobby(Message message, Connection client)

@@ -15,9 +15,10 @@ namespace LobbyHost.Types
         public const ushort PublicSendFromServer = 2;
         public const ushort PublicBroadcast = 3;
 
-        public const ushort DeleteLobby = 10;
+        public const ushort LobbyPlayerDisconnect = 10;
         public const ushort CreateLobby = 11;
         public const ushort UpdateLobby = 12;
+        public const ushort JoinLobby = 13;
 
         public const ushort RequestLobbies = 100;
         public const ushort FinishLobbySending = 101;

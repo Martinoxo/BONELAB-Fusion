@@ -18,23 +18,12 @@ namespace LobbyHost
         {
             var lobby = Lobby.GetLobby(e.Client.Id);
 
-            if (lobby == null)
-                return;
-
-            if (lobby.HostId == e.Client.Id)
-            {
-                Core.CurrentLobbies.Remove(lobby);
-                TUIManager.RefreshUi($"Lobby with Host ID {lobby.HostId} closed.");
-            } else
-            {
-
-                TUIManager.RefreshUi($"Client with ID {e.Client.Id} disconnected from lobby with Host ID {lobby.HostId}");
-            }
+            lobby.OnDisconnect(e.Client);
         }
 
         internal static void OnClientConnected(object? sender, ServerConnectedEventArgs e)
         {
-            e.Client.TimeoutTime = 30000;
+            e.Client.TimeoutTime = 20000;
             e.Client.CanQualityDisconnect = false;
         }
 
@@ -50,11 +39,6 @@ namespace LobbyHost
                 case MessageTypes.CreateLobby:
                     {
                         LobbyMessageHandler.HandleCreateLobby(e.Message, e.FromConnection);
-                        break;
-                    }
-                case MessageTypes.DeleteLobby:
-                    {
-                        LobbyMessageHandler.HandleDeleteLobby(e.Message, e.FromConnection);
                         break;
                     }
                 case MessageTypes.UpdateLobby:
@@ -114,6 +98,11 @@ namespace LobbyHost
                         }
 
                         TUIManager.RefreshUi($"Got Broadcast message from {e.FromConnection.Id}");
+                        break;
+                    }
+                case MessageTypes.JoinLobby:
+                    {
+                        LobbyMessageHandler.HandleJoinLobby(e.Message, e.FromConnection);
                         break;
                     }
             }
