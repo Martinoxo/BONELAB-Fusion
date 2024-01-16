@@ -558,36 +558,28 @@ namespace LabFusion.Riptide
 
         private bool CheckIsClient()
         {
-            try
-            {
-                return (CurrentClient.IsConnected || PublicLobbyClient.IsConnected);
-            }
-            catch
-            {
+            if (CurrentClient == null || PublicLobbyClient == null)
                 return false;
-            }
+
+            return (CurrentClient.IsConnected || PublicLobbyClient.IsConnected);
         }
 
         private bool CheckIsServer()
         {
-            try
-            {
-                switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
-                {
-                    case ServerTypes.P2P:
-                        return CurrentServer.IsRunning;
-                    case ServerTypes.Public:
-                        if (PublicLobbyClient.Id == HostId)
-                            return true;
-                        else
-                            return false;
-                    default:
-                        return false;
-                }
-            }
-            catch
-            {
+            if (CurrentServer == null || PublicLobbyClient == null)
                 return false;
+
+            switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
+            {
+                case ServerTypes.P2P:
+                    return CurrentServer.IsRunning;
+                case ServerTypes.Public:
+                    if (PublicLobbyClient.Id == HostId)
+                        return true;
+                    else
+                        return false;
+                default:
+                    return false;
             }
         }
 
