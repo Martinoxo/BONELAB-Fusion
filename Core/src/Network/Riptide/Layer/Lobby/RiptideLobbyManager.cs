@@ -18,43 +18,45 @@ namespace LabFusion.Riptide
         private readonly ProxyNetworkLayer _networkLayer;
         private readonly Dictionary<ulong, TaskCompletionSource<LobbyMetadataInfo>> _metadataInfoRequests = new();
 
+        private List<RiptideLobby> _lobbies = new();
         internal void HandleRiptideMessage(Message message)
         {
             if (_lobbySource == null)
             {
-                FusionLogger.Error("Got extra RequestLobbies response?");
                 return;
             }
 
             int lobbyCount = message.GetInt();
+#if DEBUG
             FusionLogger.Log($"Got {lobbyCount} lobbies");
+#endif
 
-            RiptideLobby[] lobbies = new RiptideLobby[lobbyCount];
+            ushort hostId = message.GetUShort();
+            int metadataCount = message.GetInt();
 
-            for (int i = 0; i < lobbyCount; i++)
+            List<KeyValuePair<string, string>> metadata = new List<KeyValuePair<string, string>>();
+
+            for (int j = 0; j < metadataCount; j++)
             {
-                ushort hostId = message.GetUShort();
-                int metadataCount = message.GetInt();
+                string key = message.GetString();
+                string value = message.GetString();
 
-                List<KeyValuePair<string, string>> metadata = new List<KeyValuePair<string, string>>();
-
-                for (int j = 0; j < metadataCount; j++)
-                {
-                    string key = message.GetString();
-                    string value = message.GetString();
-
-                    metadata.Add(new KeyValuePair<string, string>(key, value));
-                }
-
-                RiptideLobby lobby = new(metadata, hostId);
-                FusionLogger.Log($"Got Lobby: {hostId}");
-
-                lobbies[i] = lobby;
+                metadata.Add(new KeyValuePair<string, string>(key, value));
             }
 
+            RiptideLobby lobby = new(metadata, hostId);
+#if DEBUG
+            FusionLogger.Log($"Got Lobby: {hostId}");
+#endif
+            _lobbies.Add(lobby);
+
             // Finish the task
-            _lobbySource.SetResult(lobbies);
-            _lobbySource = null;
+            if (_lobbies.Count == lobbyCount)
+            {
+                _lobbySource.SetResult(_lobbies.ToArray());
+                _lobbySource = null;
+                _lobbies = new();
+            }
         }
 
         public Task<RiptideLobby[]> RequestLobbies()

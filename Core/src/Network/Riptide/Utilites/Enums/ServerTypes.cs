@@ -11,9 +11,7 @@ namespace LabFusion.Riptide.Utilities
     /// </summary>
     public enum ServerTypes
     {
-        None = 0,
-        P2P = 1,
-        Dedicated = 2,
-        Public = 3,
+        P2P = 0,
+        Public = 1,
     }
 }

@@ -29,14 +29,14 @@ using SLZ.Marrow.Data;
 using SLZ.Props;
 using BoneLib.BoneMenu;
 using System.Collections;
+using System.Net;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace LabFusion.Riptide
 {
     public class RiptideNetworkLayer : NetworkLayer
     {
         public static readonly string TideFusionPath = $"{MelonUtils.UserDataDirectory}/TideFusion";
-
-        internal static ServerTypes CurrentServerType = ServerTypes.None;
 
         internal static ushort HostId = 0;
 
@@ -89,7 +89,7 @@ namespace LabFusion.Riptide
             CurrentServer.ClientConnected += OnClientConnect;
             CurrentClient.Disconnected += OnDisconnectFromServer;
             CurrentClient.ConnectionFailed += OnConnectionFail;
-            PublicLobbyClient.Disconnected += OnDisconnectFromLobby;
+            PublicLobbyClient.Disconnected += OnDisconnectFromServer;
 
             // Riptide Messages
             CurrentServer.MessageReceived += ServerManagement.OnMessageReceived;
@@ -100,12 +100,7 @@ namespace LabFusion.Riptide
             MultiplayerHooking.OnPlayerJoin += OnPlayerJoin;
             MultiplayerHooking.OnPlayerLeave += OnPlayerLeave;
             MultiplayerHooking.OnDisconnect += OnDisconnect;
-        }
-
-        private void OnDisconnectFromLobby(object sender, DisconnectedEventArgs e)
-        {
-            if (CurrentServerType == ServerTypes.Public && FusionPreferences.ReceivedServerSettings != null || PlayerIdManager.LocalLongId == HostId)
-                InternalServerHelpers.OnDisconnect();
+            MultiplayerHooking.OnServerSettingsChanged += OnUpdateLobby;
         }
 
         private void OnPlayerJoin(PlayerId id)
@@ -126,6 +121,7 @@ namespace LabFusion.Riptide
         private void OnDisconnect()
         {
             VoiceManager.RemoveAll();
+            HostId = 0;
 
             OnUpdateLobby();
         }
@@ -195,15 +191,9 @@ namespace LabFusion.Riptide
 #endif
         }
 
-        // P2P Matchmaking
-        private MenuCategory _p2pServerInfoCategory;
-        private MenuCategory _p2pManualJoiningCategory;
-
-        // Public Lobby Matchmaking (Future)
-        private MenuCategory _publicMatchmakingCategory;
-        private MenuCategory _publicServerInfoCategory;
-        private MenuCategory _publicManualJoiningCategory;
-
+        private FunctionElement _serverTypeElement;
+        private FunctionElement _createServerElement;
+        private Keyboard _serverPortKeyboard;
         private void CreateMatchmakingMenu(MenuCategory category)
         {
             // Root category
@@ -211,13 +201,50 @@ namespace LabFusion.Riptide
 
             // Server info
             var serverInfo = matchmaking.CreateCategory("Server Info", Color.white);
+
+            // Server Starting/Settings
+            _createServerElement = serverInfo.CreateFunctionElement("Start Server", Color.green, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host!");
+            _serverTypeElement = serverInfo.CreateFunctionElement($"Server Type: \n{RiptidePreferences.LocalServerSettings.ServerType.GetValue()}", Color.cyan, () => OnUpdateServerType(RiptidePreferences.LocalServerSettings.ServerType.GetValue()));
+            RiptidePreferences.LocalServerSettings.ServerType.OnValueChanged += (v) => _serverTypeElement.SetName($"Server Type: \n{v}");
+            var p2pServerSettingsMenu = serverInfo.CreateCategory("P2P Server Settings", Color.cyan);
+            _serverPortKeyboard = Keyboard.CreateKeyboard(p2pServerSettingsMenu, $"Server Port:\n{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}", (port) => OnChangeServerPort(port));
+            serverInfo.CreateFunctionElement("Display Server Code", Color.white, () => OnDislayServerCode());
+
+            // Server Info
             BoneMenuCreator.PopulateServerInfo(serverInfo);
 
             // P2P Server
-            CreateP2PServerMenu(matchmaking);
+            CreateP2PJoiningMenu(matchmaking);
 
             // Public Lobbies
             CreatePublicLobbyCategory(matchmaking);
+        }
+
+        private void OnUpdateServerType(ServerTypes type)
+        {
+            if (IsClient)
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    isMenuItem = false,
+                    isPopup = true,
+                    message = "Cannot change server type whilst connected!",
+                    type = NotificationType.ERROR,
+                });
+                return;
+            }
+
+            switch (type)
+            {
+                case ServerTypes.P2P:
+                    RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.Public);
+                    _serverTypeElement.SetName($"Server Type: \n{RiptidePreferences.LocalServerSettings.ServerType.GetValue()}");
+                    break;
+                case ServerTypes.Public:
+                    RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.P2P);
+                    _serverTypeElement.SetName($"Server Type: \n{RiptidePreferences.LocalServerSettings.ServerType.GetValue()}");
+                    break;
+            }
         }
 
         private Keyboard _publicLobbyIpKeyboard;
@@ -249,6 +276,21 @@ namespace LabFusion.Riptide
 
         private void OnChangePublicLobbyIp(string ip, MenuCategory categoryToSwitchTo)
         {
+            if (!IPAddress.TryParse(ip, out var serverIp))
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    title = "Invalid Server IP",
+                    showTitleOnPopup = true,
+                    message = $"The Public Lobby IP you entered is invalid!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
+                return;
+            }
+
             if (!PublicLobbyClient.IsConnected && !PublicLobbyClient.IsConnecting)
             {
                 RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.SetValue(ip);
@@ -286,7 +328,7 @@ namespace LabFusion.Riptide
         {
             _activeMicrophoneElement.SetName($"Active Microphone: \n{microphone}");
 
-            BoneLib.BoneMenu.MenuManager.SelectCategory(_microphoneSettingsCategory);
+            MenuManager.SelectCategory(_microphoneSettingsCategory);
         }
 
         private void CreateRiptideDebugMenu(MenuCategory category)
@@ -294,36 +336,26 @@ namespace LabFusion.Riptide
             var debugMenu = category.CreateCategory("Debug", Color.red);
         }
 
-        private FunctionElement _createServerElement;
-        private Keyboard _serverPortKeyboard;
-        private void CreateP2PServerMenu(MenuCategory category)
+        private void CreateP2PJoiningMenu(MenuCategory category)
         {
-            var p2pServerMenu = category.CreateCategory("P2P", Color.white);
+            var p2pMenu = category.CreateCategory("P2P Joining", Color.white);
 
-            // Hosting
-            var p2pHostingMenu = p2pServerMenu.CreateCategory("Hosting", Color.white);
-            _createServerElement = p2pHostingMenu.CreateFunctionElement("Start P2P Server", Color.green, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host!");
-            var p2pServerSettingsMenu = p2pHostingMenu.CreateCategory("Riptide Server Settings", Color.cyan);
-            _serverPortKeyboard = Keyboard.CreateKeyboard(p2pServerSettingsMenu, $"Server Port:\n{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}", (port) => OnChangeServerPort(port));
-            p2pHostingMenu.CreateFunctionElement("Display Server Code", Color.white, () => OnDislayServerCode());
-
-            // joining
-            var manualJoining = p2pServerMenu.CreateCategory("Joining", Color.white);
-            CreateP2PManualJoiningMenu(manualJoining);
+            CreateP2PManualJoiningMenu(p2pMenu);
 
             // Server Listings
-            ServerListingCategory.CreateServerListingCategory(p2pServerMenu);
+            ServerListingCategory.CreateServerListingCategory(p2pMenu);
         }
 
         private MenuCategory _publicLobbiesCategory;
         private void CreatePublicLobbyCategory(MenuCategory category)
         {
-            var publicLobbyCategory = category.CreateCategory("Public Lobbies", Color.white);
+            var publicLobbyCategory = category.CreateCategory("Public Joining", Color.white);
 
-            publicLobbyCategory.CreateFunctionElement("Create Lobby", Color.green, () => CreatePublicLobby());
+            // Manual Joining
+            var manualJoining = publicLobbyCategory.CreateCategory("Manual Joining", Color.white);
 
             // Public lobbies list
-            _publicLobbiesCategory = publicLobbyCategory.CreateCategory("Lobby List", Color.white);
+            _publicLobbiesCategory = publicLobbyCategory.CreateCategory("Public Lobbies", Color.white);
             _publicLobbiesCategory.CreateFunctionElement("Refresh", Color.white, Menu_RefreshPublicLobbies);
             _publicLobbiesCategory.CreateFunctionElement("Select Refresh to load servers!", Color.yellow, null);
         }
@@ -384,7 +416,7 @@ namespace LabFusion.Riptide
 
             foreach (var lobby in lobbies)
             {
-                var info = LobbyMetadataInfo.Read(lobby);
+                var info = LobbyMetadataHelper.ReadInfo(lobby);
                 FusionLogger.Log("Got lobby: " + info.LobbyId);
                 FusionLogger.Log("Lobby has " + lobby.Metadata.Count + " metadata entries");
             }
@@ -393,9 +425,11 @@ namespace LabFusion.Riptide
             {
                 foreach (var lobby in lobbies)
                 {
-                    var info = LobbyMetadataInfo.Read(lobby);
+                    var info = LobbyMetadataHelper.ReadInfo(lobby);
+
                     if (Internal_CanShowLobby(info))
                     {
+                        // Add to list
                         BoneMenuCreator.CreateLobby(_publicLobbiesCategory, info, lobby, sortMode);
                     }
                 }
@@ -451,7 +485,15 @@ namespace LabFusion.Riptide
             // Otherwise, start a server
             else
             {
-                ServerManagement.StartServer();
+                switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
+                {
+                    case ServerTypes.P2P:
+                        ServerManagement.StartServer();
+                        break;
+                    case ServerTypes.Public:
+                        ServerManagement.CreatePublicLobby();
+                        break;
+                }
             }
         }
 
@@ -481,9 +523,10 @@ namespace LabFusion.Riptide
         private ushort _serverPortToJoin = 7777;
         private void CreateP2PManualJoiningMenu(MenuCategory category)
         {
-            category.CreateFunctionElement("Join Server", Color.green, () => ClientManagement.P2PJoinServer(_serverCodeToJoin, _serverPortToJoin));
-            _targetP2PCodeCategory = Keyboard.CreateKeyboard(category, "Server Code:", (code) => OnChangeJoinCode(code)).Category;
-            _targetP2PPortCategory = Keyboard.CreateKeyboard(category, $"Server Port:\n{_serverPortToJoin}", (port) => OnChangeJoinPort(port)).Category;
+            var manualJoining = category.CreateCategory("Manual Joining", Color.white);
+            manualJoining.CreateFunctionElement("Join Server", Color.green, () => P2PJoinServer(_serverCodeToJoin, _serverPortToJoin));
+            _targetP2PCodeCategory = Keyboard.CreateKeyboard(manualJoining, "Server Code:", (code) => OnChangeJoinCode(code)).Category;
+            _targetP2PPortCategory = Keyboard.CreateKeyboard(manualJoining, $"Server Port:\n{_serverPortToJoin}", (port) => OnChangeJoinPort(port)).Category;
         }
 
         private void OnChangeJoinCode(string code)
@@ -515,41 +558,36 @@ namespace LabFusion.Riptide
 
         private bool CheckIsClient()
         {
-            switch (CurrentServerType)
+            try
             {
-                case ServerTypes.None:
-                    return false;
-                case ServerTypes.P2P:
-                    return CurrentClient.IsConnected;
-                case ServerTypes.Public:
-                    if (PublicLobbyClient.IsConnected)
-                        return true;
-                    else
-                        return false;
-                case ServerTypes.Dedicated:
-                    return false;
-                default:
-                    return false;
+                return (CurrentClient.IsConnected || PublicLobbyClient.IsConnected);
+            }
+            catch
+            {
+                return false;
             }
         }
 
         private bool CheckIsServer()
         {
-            switch (CurrentServerType)
+            try
             {
-                case ServerTypes.None:
-                    return false;
-                case ServerTypes.P2P:
-                    return CurrentServer.IsRunning;
-                case ServerTypes.Public:
-                    if (PublicLobbyClient.Id == HostId)
-                        return true;
-                    else
+                switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
+                {
+                    case ServerTypes.P2P:
+                        return CurrentServer.IsRunning;
+                    case ServerTypes.Public:
+                        if (PublicLobbyClient.Id == HostId)
+                            return true;
+                        else
+                            return false;
+                    default:
                         return false;
-                case ServerTypes.Dedicated:
-                    return false;
-                default:
-                    return false;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -581,23 +619,30 @@ namespace LabFusion.Riptide
         private FieldInfo _fieldInfo = typeof(FunctionElement).GetField("_confirmer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         private void OnUpdateCreateServerText()
         {
-            if (CurrentClient.IsConnected && !CurrentServer.IsRunning)
+            if (_createServerElement == null)
+                return;
+
+            if (IsClient && !IsServer)
             {
                 _createServerElement.SetName("Disconnect");
                 _createServerElement.SetColor(Color.red);
                 _fieldInfo.SetValue(_createServerElement, false);
             }
-            else if (CurrentServer.IsRunning)
+            else if (IsServer)
             {
                 _createServerElement.SetName("Stop Server");
                 _createServerElement.SetColor(Color.red);
                 _fieldInfo.SetValue(_createServerElement, false);
             }
-            else if (!CurrentClient.IsConnected)
+            else if (!IsClient)
             {
-                _createServerElement.SetName("Start P2P Server");
+                _createServerElement.SetName("Start Server");
                 _createServerElement.SetColor(Color.green);
-                _fieldInfo.SetValue(_createServerElement, true);
+
+                if (RiptidePreferences.LocalServerSettings.ServerType.GetValue() == ServerTypes.Public)
+                    _fieldInfo.SetValue(_createServerElement, true);
+                else
+                    _fieldInfo.SetValue(_createServerElement, false);
             }
         }
 
@@ -608,7 +653,8 @@ namespace LabFusion.Riptide
         #region BROADCAST
         internal override void BroadcastMessage(NetworkChannel channel, FusionMessage message)
         {
-            switch (CurrentServerType)
+            FusionLogger.Log("Broadcasting message");
+            switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
             {
                 case ServerTypes.P2P:
                     if (IsServer)
@@ -617,24 +663,11 @@ namespace LabFusion.Riptide
                     }
                     else
                     {
-                        CurrentClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel), true);
+                        CurrentClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel));
                     }
                     break;
                 case ServerTypes.Public:
-                    if (IsServer)
-                    {
-                        var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicBroadcast);
-                        msg.AddUShort(PublicLobbyClient.Id);
-                        PublicLobbyClient.Send(msg, false);
-                    }
-                    else
-                    {
-                        var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendToServer);
-                        msg.AddUShort(HostId);
-                        PublicLobbyClient.Send(msg, false);
-                    }
-                    break;
-                case ServerTypes.Dedicated:
+                    PublicLobbyClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicBroadcast).AddBool(IsServer).AddUShort(HostId));
                     break;
             }
         }
@@ -642,17 +675,14 @@ namespace LabFusion.Riptide
         #region SENDTOSERVER
         internal override void SendToServer(NetworkChannel channel, FusionMessage message)
         {
-            switch (CurrentServerType)
+            FusionLogger.Log("Sending message to server");
+            switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
             {
                 case ServerTypes.P2P:
                     CurrentClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel));
                     break;
                 case ServerTypes.Public:
-                    var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendToServer);
-                    msg.AddUShort(HostId);
-                    PublicLobbyClient.Send(msg, false);
-                    break;
-                case ServerTypes.Dedicated:
+                    PublicLobbyClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendToServer).AddUShort(HostId));
                     break;
             }
         }
@@ -669,31 +699,33 @@ namespace LabFusion.Riptide
 
         internal override void SendFromServer(ulong userId, NetworkChannel channel, FusionMessage message)
         {
-            switch (CurrentServerType)
+            FusionLogger.Log("Sending to client");
+            switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
             {
                 case ServerTypes.P2P:
                     if (IsServer)
                     {
-                        Connection client;
                         if (userId == PlayerIdManager.LocalLongId)
                         {
-                            CurrentServer.Send(Messages.FusionMessage.CreateFusionMessage(message, channel), (ushort)PlayerIdManager.LocalLongId);
+                            FusionMessageHandler.ReadMessage(message.ToByteArray());
                         }
-                        else if (CurrentServer.TryGetClient((ushort)userId, out client))
+                        else if (CurrentServer.TryGetClient((ushort)userId, out var client))
                         {
-                            CurrentServer.Send(Messages.FusionMessage.CreateFusionMessage(message, channel), client, true);
+                            CurrentServer.Send(Messages.FusionMessage.CreateFusionMessage(message, channel), client);
                         }
                     }
                     break;
                 case ServerTypes.Public:
                     if (IsServer)
                     {
-                        var msg = Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendFromServer);
-                        msg.AddUShort((ushort)userId);
-                        PublicLobbyClient.Send(msg, false);
+                        if (userId == PlayerIdManager.LocalLongId)
+                        {
+                            PublicLobbyClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendFromServer).AddUShort((ushort)userId).AddBool(true));
+                        } else
+                        {
+                            PublicLobbyClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendFromServer).AddUShort((ushort)userId).AddBool(false));
+                        }
                     }
-                    break;
-                case ServerTypes.Dedicated:
                     break;
             }
         }
@@ -702,17 +734,21 @@ namespace LabFusion.Riptide
 
         internal override void Disconnect(string reason = "")
         {
-            // Make sure we are currently in a server
-            if (!IsServer && !IsClient)
-                return;
+            {
+                if (!IsServer && !IsClient)
+                    return;
 
-            if (IsClient)
-                CurrentClient.Disconnect();
+                if (IsClient)
+                {
+                    CurrentClient.Disconnect();
+                    PublicLobbyClient.Disconnect();
+                }
 
-            if (IsServer)
-                CurrentServer.Stop();
+                if (IsServer && RiptidePreferences.LocalServerSettings.ServerType.GetValue() == ServerTypes.P2P)
+                    CurrentServer.Stop();
 
-            OnUpdateLobby();
+                OnUpdateLobby();
+            }
         }
 
         internal override void OnCleanupLayer()

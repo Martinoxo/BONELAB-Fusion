@@ -14,6 +14,9 @@ using Unity.Collections;
 using LabFusion.Riptide.Utilities;
 using LabFusion.Riptide.Preferences;
 using LabFusion.Utilities;
+using LabFusion.Riptide.Messages;
+using static LabFusion.Riptide.ClientManagement;
+using System.Net;
 
 namespace LabFusion.Riptide
 {
@@ -40,6 +43,8 @@ namespace LabFusion.Riptide
             if (CurrentServer.IsRunning)
                 CurrentServer.Stop();
 
+            RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.P2P);
+
             CurrentServer.Start(RiptidePreferences.LocalServerSettings.ServerPort.GetValue(), 256, 0, false);
 
             ClientManagement.CurrentClient.Connected += OnConnectToP2PServer;
@@ -50,8 +55,6 @@ namespace LabFusion.Riptide
         private static void OnConnectToP2PServer(object sender, EventArgs e)
         {
             ClientManagement.CurrentClient.Connected -= OnConnectToP2PServer;
-
-            RiptideNetworkLayer.CurrentServerType = ServerTypes.P2P;
 
             ClientManagement.CurrentClient.TimeoutTime = 30000;
             ClientManagement.CurrentClient.Connection.CanQualityDisconnect = false;
@@ -82,6 +85,71 @@ namespace LabFusion.Riptide
         public static void OnClientConnect(object obj, ServerConnectedEventArgs args)
         {
             args.Client.CanQualityDisconnect = false;
+        }
+
+        public static void CreatePublicLobby()
+        {
+            string serverIp = RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue();
+            if (string.IsNullOrEmpty(serverIp))
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    title = "No Server IP",
+                    showTitleOnPopup = true,
+                    message = $"You have no Public Lobby IP to join! Add one in Riptide Settings!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
+                return;
+            }
+
+            if (!IPAddress.TryParse(serverIp, out var ip))
+            {
+                FusionNotifier.Send(new FusionNotification()
+                {
+                    title = "Invalid Server IP",
+                    showTitleOnPopup = true,
+                    message = $"The Public Lobby IP you entered is invalid!",
+                    isMenuItem = false,
+                    isPopup = true,
+                    popupLength = 5f,
+                    type = NotificationType.ERROR
+                });
+                return;
+            }
+
+            if (!PublicLobbyClient.IsConnected)
+            {
+                void OnConnect(object sender, EventArgs e)
+                {
+                    PublicLobbyClient.Connected -= OnConnect;
+                    PublicLobbyClient.Send(PublicLobbyMessage.CreatePublicLobbyMessage());
+                };
+
+                PublicLobbyClient.Connected += OnConnect;
+                PublicLobbyClient.Connect($"{serverIp}:6666", 5, 0, null, false);
+            }
+            else
+            {
+                PublicLobbyClient.Send(PublicLobbyMessage.CreatePublicLobbyMessage());
+            }
+        }
+
+        internal static void HandleCreateLobbyMessage()
+        {
+            RiptideNetworkLayer.HostId = PublicLobbyClient.Id;
+
+            PublicLobbyClient.TimeoutTime = 30000;
+            PublicLobbyClient.Connection.CanQualityDisconnect = false;
+
+            PlayerIdManager.SetLongId(PublicLobbyClient.Id);
+
+            // Call server setup
+            InternalServerHelpers.OnStartServer();
+
+            InternalLayerHelpers.OnUpdateLobby();
         }
 
         /// <summary>

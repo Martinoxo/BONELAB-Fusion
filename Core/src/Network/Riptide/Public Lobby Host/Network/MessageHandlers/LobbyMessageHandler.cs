@@ -1,4 +1,5 @@
 ﻿using LobbyHost.Types;
+using LobbyHost.UI;
 using Riptide;
 using System;
 using System.Collections.Generic;
@@ -12,12 +13,12 @@ namespace LobbyHost.MessageHandlers
     {
         internal static void HandleRequestLobbies(Message message, Connection client)
         {
-            var lobbyResponse = Message.Create(MessageSendMode.Reliable, (ushort)MessageTypes.RequestLobbies);
-
-            lobbyResponse.AddInt(Core.CurrentLobbies.Count);
-
             foreach (var lobby in Core.CurrentLobbies)
             {
+                var lobbyResponse = Message.Create(MessageSendMode.Reliable, (ushort)MessageTypes.RequestLobbies);
+
+                lobbyResponse.AddInt(Core.CurrentLobbies.Count);
+
                 lobbyResponse.AddUShort(lobby.HostId);
                 lobbyResponse.AddInt(lobby.Metadata.Count);
 
@@ -26,14 +27,9 @@ namespace LobbyHost.MessageHandlers
                     lobbyResponse.AddString(metadata.Key);
                     lobbyResponse.AddString(metadata.Value);
                 }
+
+                Core.Server.Send(lobbyResponse, client.Id);
             }
-
-            Core.Server.Send(lobbyResponse, client.Id);
-        }
-
-        internal static void HandleUpdateLobbyInfo(Message message, Connection client)
-        {
-
         }
 
         internal static void HandleJoinLobby(Message message, Connection client)
@@ -48,6 +44,8 @@ namespace LobbyHost.MessageHandlers
 
             var response = Message.Create(MessageSendMode.Reliable, MessageTypes.CreateLobby);
             Core.Server.Send(response, client.Id);
+
+            TUIManager.RefreshUi($"Created lobby with Id {client.Id}");
         }
 
         internal static void HandleDeleteLobby(Message message, Connection client)
@@ -60,22 +58,17 @@ namespace LobbyHost.MessageHandlers
             string key = message.GetString();
             string value = message.GetString();
 
-            KeyValuePair<string, string> keyValuePair = new KeyValuePair<string, string>(key, value);
-
             var lobby = Lobby.GetLobby(client.Id);
 
-            foreach (var pair in lobby.Metadata)
-            {
-                if (pair.Key == key)
-                {
-                    lobby.Metadata.Remove(pair);
-                    lobby.Metadata.Add(keyValuePair);
+            // Remove the pair if it exists
+            int index = lobby.Metadata.FindIndex(pair => pair.Key == key);
+            if (index >= 0) 
+                lobby.Metadata.RemoveAt(index);
 
-                    return;
-                }
-            }
+            // Add metadata to the lobby
+            lobby.Metadata.Add(new KeyValuePair<string, string>(key, value));
 
-            lobby.Metadata.Add(keyValuePair);
+            TUIManager.RefreshUi($"Obtained lobby key {key} with value {value}");
         }
     }
 }

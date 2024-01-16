@@ -1,4 +1,5 @@
 ﻿using LabFusion.Preferences;
+using LabFusion.Riptide.Utilities;
 using MelonLoader;
 using System;
 using System.Collections.Generic;
@@ -19,13 +20,15 @@ namespace LabFusion.Riptide.Preferences
         {
             public IFusionPref<ushort> ServerPort;
             public IFusionPref<string> PublicLobbyServerIp;
+            public IFusionPref<ServerTypes> ServerType;
 
             public static ServerSettings CreateMelonPrefs()
             {
                 return new ServerSettings()
                 {
                     ServerPort = new FusionPref<ushort>(TideCategory, "ServerPort", 7777),
-                    PublicLobbyServerIp = new FusionPref<string>(TideCategory, "PublicLobbyServerIp", "172.0.0.1")
+                    PublicLobbyServerIp = new FusionPref<string>(TideCategory, "PublicLobbyServerIp", "172.0.0.1"),
+                    ServerType = new FusionPref<ServerTypes>(TideCategory, "ServerType", ServerTypes.Public)
                 };
             }
         }

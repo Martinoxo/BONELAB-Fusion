@@ -48,27 +48,6 @@ namespace LabFusion.Riptide.BoneMenu
 
             keyboard.OnEnter = onEnter;
 
-            GameObject keyboardObject = GameObject.Instantiate(TideContentLoader.KeyboardPrefab);
-            keyboardObject.SetActive(true);
-            if (keyboardObject == null )
-            {
-                FusionLogger.Error($"Keyboard is null for keyboard {name}!");
-                return null;
-            }
-            var canvas = keyboardObject.transform.Find("Keyboard").Find("Canvas");
-            if (canvas == null)
-            {
-                FusionLogger.Error($"Canvas is null for keyboard {name}!");
-                return null;
-            }
-
-            var keyboardCanvas = canvas.gameObject.AddComponent<KeyboardCanvas>();
-            keyboardCanvas.Keyboard = keyboard;
-            keyboardCanvas.SetupReferences();
-            keyboard.KeyboardObject = keyboardObject;
-
-            keyboardObject.SetActive(false);
-
             return keyboard;
         }
 
