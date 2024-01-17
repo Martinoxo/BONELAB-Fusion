@@ -27,7 +27,7 @@ namespace LabFusion.Riptide.Preferences
                 return new ServerSettings()
                 {
                     ServerPort = new FusionPref<ushort>(TideCategory, "ServerPort", 7777),
-                    PublicLobbyServerIp = new FusionPref<string>(TideCategory, "PublicLobbyServerIp", "172.0.0.1"),
+                    PublicLobbyServerIp = new FusionPref<string>(TideCategory, "PublicLobbyServerIp", "127.0.0.1"),
                     ServerType = new FusionPref<ServerTypes>(TideCategory, "ServerType", ServerTypes.Public)
                 };
             }
