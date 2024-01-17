@@ -171,10 +171,10 @@ namespace LabFusion.Riptide
             if (CurrentClient.IsConnected)
                 CurrentClient.Disconnect();
 
-            RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.Public);
+            if (PublicLobbyClient.IsConnected)
+                PublicLobbyClient.Disconnect();
 
-            if (InternalLayerHelpers.CurrentNetworkLayer.IsClient)
-                NetworkHelper.Disconnect();
+            RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.Public);
 
             RiptideNetworkLayer.HostId = hostId;
 

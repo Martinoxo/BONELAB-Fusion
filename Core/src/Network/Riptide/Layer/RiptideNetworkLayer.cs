@@ -631,24 +631,27 @@ namespace LabFusion.Riptide
             {
                 _createServerElement.SetName("Disconnect");
                 _createServerElement.SetColor(Color.red);
-                _fieldInfo.SetValue(_createServerElement, false);
             }
             else if (IsServer)
             {
                 _createServerElement.SetName("Stop Server");
                 _createServerElement.SetColor(Color.red);
-                _fieldInfo.SetValue(_createServerElement, false);
             }
             else if (!IsClient)
             {
                 _createServerElement.SetName("Start Server");
                 _createServerElement.SetColor(Color.green);
-
-                if (RiptidePreferences.LocalServerSettings.ServerType.GetValue() == ServerTypes.Public)
-                    _fieldInfo.SetValue(_createServerElement, true);
-                else
-                    _fieldInfo.SetValue(_createServerElement, false);
             }
+
+            if (RiptidePreferences.LocalServerSettings.ServerType.GetValue() == ServerTypes.P2P)
+            {
+                if (!IsClient)
+                {
+                    _fieldInfo.SetValue(_createServerElement, true);
+                }
+            }
+            else
+                _fieldInfo.SetValue(_createServerElement, false);
         }
 
         internal override void StartServer() => ServerManagement.StartServer();
@@ -658,7 +661,6 @@ namespace LabFusion.Riptide
         #region BROADCAST
         internal override void BroadcastMessage(NetworkChannel channel, FusionMessage message)
         {
-            FusionLogger.Log("Broadcasting message");
             switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
             {
                 case ServerTypes.P2P:
@@ -686,7 +688,6 @@ namespace LabFusion.Riptide
         #region SENDTOSERVER
         internal override void SendToServer(NetworkChannel channel, FusionMessage message)
         {
-            FusionLogger.Log("Sending message to server");
             switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
             {
                 case ServerTypes.P2P:
@@ -710,7 +711,6 @@ namespace LabFusion.Riptide
 
         internal override void SendFromServer(ulong userId, NetworkChannel channel, FusionMessage message)
         {
-            FusionLogger.Log("Sending to client");
             switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
             {
                 case ServerTypes.P2P:

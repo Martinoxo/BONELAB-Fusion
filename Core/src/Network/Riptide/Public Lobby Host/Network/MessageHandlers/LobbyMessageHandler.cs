@@ -48,10 +48,11 @@ namespace LobbyHost.MessageHandlers
                 lobby.Clients.Add(client);
 
                 var msg = Message.Create(MessageSendMode.Reliable, MessageTypes.JoinLobby);
+                Core.Server.Send(msg, client.Id);
                 msg.AddBool(true);
             } else
             {
-
+                TUIManager.RefreshUi("Failed to join lobby.");
             }
         }
 
