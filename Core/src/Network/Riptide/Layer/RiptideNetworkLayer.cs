@@ -579,7 +579,7 @@ namespace LabFusion.Riptide
 
         private bool CheckIsServer()
         {
-            if (CurrentServer == null || PublicLobbyClient == null)
+            if (CurrentServer == null || PublicLobbyClient == null || HostId == 0)
                 return false;
 
             switch (RiptidePreferences.LocalServerSettings.ServerType.GetValue())
@@ -672,7 +672,13 @@ namespace LabFusion.Riptide
                     }
                     break;
                 case ServerTypes.Public:
-                    PublicLobbyClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicBroadcast).AddBool(IsServer).AddUShort(HostId));
+                    if (IsServer)
+                    {
+                        PublicLobbyClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicBroadcast));
+                    } else
+                    {
+                        PublicLobbyClient.Send(Messages.FusionMessage.CreateFusionMessage(message, channel, MessageTypes.PublicSendToServer).AddUShort(HostId));
+                    }
                     break;
             }
         }

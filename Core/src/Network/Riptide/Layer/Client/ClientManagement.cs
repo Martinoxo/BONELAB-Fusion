@@ -176,10 +176,10 @@ namespace LabFusion.Riptide
             if (InternalLayerHelpers.CurrentNetworkLayer.IsClient)
                 NetworkHelper.Disconnect();
 
+            RiptideNetworkLayer.HostId = hostId;
+
             if (InternalLayerHelpers.CurrentNetworkLayer.IsClient)
             {
-                RiptideNetworkLayer.HostId = hostId;
-
                 PlayerIdManager.SetLongId(PublicLobbyClient.Id);
 
                 PublicLobbyClient.Send(PublicLobbyMessages.CreateJoinPublicLobbyMessage(hostId));
@@ -187,10 +187,7 @@ namespace LabFusion.Riptide
             {
                 void OnConnect(object sender, EventArgs e)
                 {
-
                     PublicLobbyClient.Connected -= OnConnect;
-
-                    RiptideNetworkLayer.HostId = hostId;
 
                     PlayerIdManager.SetLongId(PublicLobbyClient.Id);
 

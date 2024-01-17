@@ -54,8 +54,6 @@ namespace LobbyHost
                         var msg = CreateFusionMessage(data, e.Message.SendMode);
                         msg.AddBool(true);
                         Core.Server.Send(msg, id);
-
-                        TUIManager.RefreshUi($"Got PublicSendToServer message from {e.FromConnection.Id} to {id}");
                         break;
                     }
                 case MessageTypes.PublicSendFromServer:
@@ -67,37 +65,22 @@ namespace LobbyHost
                         var msg = CreateFusionMessage(data, e.Message.SendMode);
                         msg.AddBool(isHost);
                         Core.Server.Send(msg, id);
-
-                        TUIManager.RefreshUi($"Got SendFromServer message from {e.FromConnection.Id} to {id}");
                         break;
                     }
                 case MessageTypes.PublicBroadcast:
                     {
                         byte[] data = e.Message.GetBytes();
-                        bool isHost = e.Message.GetBool();
-                        ushort id = e.Message.GetUShort();
-
-                        if (isHost)
+                        var lobby = Lobby.GetHostLobby(e.FromConnection.Id);
+                        
+                        var msg = CreateFusionMessage(data, e.Message.SendMode);
+                        if (lobby != null)
                         {
-                            var lobby = Lobby.GetHostLobby(e.FromConnection.Id);
-                            var msg = CreateFusionMessage(data, e.Message.SendMode);
-                            msg.AddBool(false);
-
-                            foreach (var connection in lobby.Clients)
+                            foreach (var client in lobby.Clients)
                             {
-                                Core.Server.Send(msg, connection.Id, false);
+                                Core.Server.Send(msg, client.Id, false);
                             }
-
                             msg.Release();
                         }
-                        else
-                        {
-                            var msg = CreateFusionMessage(data, e.Message.SendMode);
-                            msg.AddBool(true);
-                            Core.Server.Send(msg, id);
-                        }
-
-                        TUIManager.RefreshUi($"Got Broadcast message from {e.FromConnection.Id}");
                         break;
                     }
                 case MessageTypes.JoinLobby:
