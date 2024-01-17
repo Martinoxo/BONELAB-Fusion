@@ -624,34 +624,40 @@ namespace LabFusion.Riptide
         private FieldInfo _fieldInfo = typeof(FunctionElement).GetField("_confirmer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         private void OnUpdateCreateServerText()
         {
-            if (_createServerElement == null)
-                return;
+            try
+            {
+                if (_createServerElement == null)
+                    return;
 
-            if (IsClient && !IsServer)
-            {
-                _createServerElement.SetName("Disconnect");
-                _createServerElement.SetColor(Color.red);
-            }
-            else if (IsServer)
-            {
-                _createServerElement.SetName("Stop Server");
-                _createServerElement.SetColor(Color.red);
-            }
-            else if (!IsClient)
-            {
-                _createServerElement.SetName("Start Server");
-                _createServerElement.SetColor(Color.green);
-            }
-
-            if (RiptidePreferences.LocalServerSettings.ServerType.GetValue() == ServerTypes.P2P)
-            {
-                if (!IsClient)
+                if (IsClient && !IsServer)
                 {
-                    _fieldInfo.SetValue(_createServerElement, true);
+                    _createServerElement.SetName("Disconnect");
+                    _createServerElement.SetColor(Color.red);
                 }
+                else if (IsServer)
+                {
+                    _createServerElement.SetName("Stop Server");
+                    _createServerElement.SetColor(Color.red);
+                }
+                else if (!IsClient)
+                {
+                    _createServerElement.SetName("Start Server");
+                    _createServerElement.SetColor(Color.green);
+                }
+
+                if (RiptidePreferences.LocalServerSettings.ServerType.GetValue() == ServerTypes.P2P)
+                {
+                    if (!IsClient)
+                    {
+                        _fieldInfo.SetValue(_createServerElement, true);
+                    }
+                }
+                else
+                    _fieldInfo.SetValue(_createServerElement, false);
+            } catch (Exception ex)
+            {
+                FusionLogger.Error($"Failed to update Create Server text with reason: {ex.Message}");
             }
-            else
-                _fieldInfo.SetValue(_createServerElement, false);
         }
 
         internal override void StartServer() => ServerManagement.StartServer();

@@ -163,6 +163,7 @@ namespace LabFusion.Riptide
 #if DEBUG
             FusionLogger.Log($"Joining Public Lobby with Host ID: {hostId}");
 #endif
+
             string serverIp = RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue();
 
             if (ServerManagement.CurrentServer.IsRunning)
@@ -178,25 +179,18 @@ namespace LabFusion.Riptide
 
             RiptideNetworkLayer.HostId = hostId;
 
-            if (InternalLayerHelpers.CurrentNetworkLayer.IsClient)
+            void OnConnect(object sender, EventArgs e)
             {
+                PublicLobbyClient.Connected -= OnConnect;
+
                 PlayerIdManager.SetLongId(PublicLobbyClient.Id);
 
-                PublicLobbyClient.Send(PublicLobbyMessages.CreateJoinPublicLobbyMessage(hostId));
-            } else
-            {
-                void OnConnect(object sender, EventArgs e)
-                {
-                    PublicLobbyClient.Connected -= OnConnect;
-
-                    PlayerIdManager.SetLongId(PublicLobbyClient.Id);
-
-                    var msg = PublicLobbyMessages.CreateJoinPublicLobbyMessage(hostId);
-                }
-
-                PublicLobbyClient.Connected += OnConnect;
-                PublicLobbyClient.Connect($"{serverIp}:6666", 5, 0, null, false);
+                var msg = PublicLobbyMessages.CreateJoinPublicLobbyMessage(hostId);
+                PublicLobbyClient.Send(msg);
             }
+
+            PublicLobbyClient.Connected += OnConnect;
+            PublicLobbyClient.Connect($"{serverIp}:6666", 5, 0, null, false);
         }
 
         /// <summary>
