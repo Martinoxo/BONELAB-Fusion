@@ -43,23 +43,24 @@ namespace LabFusion.Riptide
             if (CurrentServer.IsRunning)
                 CurrentServer.Stop();
 
-            RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.P2P);
-
             CurrentServer.Start(RiptidePreferences.LocalServerSettings.ServerPort.GetValue(), 256, 0, false);
 
-            ClientManagement.CurrentClient.Connected += OnConnectToP2PServer;
-            ClientManagement.CurrentClient.Connect(
+            CurrentClient.Connected += OnConnectToP2PServer;
+            CurrentClient.Connect(
                 $"127.0.0.1:{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}", 5, 0, null, false);
         }
 
         private static void OnConnectToP2PServer(object sender, EventArgs e)
         {
-            ClientManagement.CurrentClient.Connected -= OnConnectToP2PServer;
+            CurrentClient.Connected -= OnConnectToP2PServer;
 
-            ClientManagement.CurrentClient.TimeoutTime = 30000;
-            ClientManagement.CurrentClient.Connection.CanQualityDisconnect = false;
+            RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.P2P);
+            RiptideNetworkLayer.HostId = 0;
+
+            CurrentClient.TimeoutTime = 15000;
+            CurrentClient.Connection.CanQualityDisconnect = false;
             
-            PlayerIdManager.SetLongId(ClientManagement.CurrentClient.Id);
+            PlayerIdManager.SetLongId(CurrentClient.Id);
             
             // Call server setup
             InternalServerHelpers.OnStartServer();
@@ -85,7 +86,7 @@ namespace LabFusion.Riptide
         public static void OnClientConnect(object obj, ServerConnectedEventArgs args)
         {
             args.Client.CanQualityDisconnect = false;
-            args.Client.TimeoutTime = 20000;
+            args.Client.TimeoutTime = 15000;
         }
 
         public static void CreatePublicLobby()

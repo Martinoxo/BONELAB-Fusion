@@ -15,6 +15,7 @@ using System.Runtime.Remoting.Messaging;
 using LabFusion.Riptide.Preferences;
 using LabFusion.Riptide.Messages;
 using System.Net;
+using System.Web.Hosting;
 
 namespace LabFusion.Riptide
 {
@@ -89,27 +90,26 @@ namespace LabFusion.Riptide
             if (!code.Contains("."))
                 code = IPExtensions.DecodeIpAddress(codeInt);
 
-            CurrentClient.Connected += OnConnectToP2PServer;
+            void OnConnect(object sender, EventArgs e)
+            {
+                CurrentClient.Connected -= OnConnect;
 
+                IsConnecting = false;
+
+                CurrentClient.TimeoutTime = 15000;
+                CurrentClient.Connection.CanQualityDisconnect = false;
+
+                PlayerIdManager.SetLongId(CurrentClient.Id);
+
+                ConnectionSender.SendConnectionRequest();
+
+                InternalLayerHelpers.OnUpdateLobby();
+            }
+
+            CurrentClient.Connected += OnConnect;
             CurrentClient.Connect($"{code}:{port}", 5, 0, null, false);
 
             IsConnecting = true;
-        }
-
-        private static void OnConnectToP2PServer(object sender, EventArgs e)
-        {
-            CurrentClient.Connected -= OnConnectToP2PServer;
-
-            IsConnecting = false;
-
-            CurrentClient.TimeoutTime = 30000;
-            CurrentClient.Connection.CanQualityDisconnect = false;
-            
-            PlayerIdManager.SetLongId(CurrentClient.Id);
-
-            ConnectionSender.SendConnectionRequest();
-
-            InternalLayerHelpers.OnUpdateLobby();
         }
 
         /// <summary>
@@ -166,17 +166,11 @@ namespace LabFusion.Riptide
 
             string serverIp = RiptidePreferences.LocalServerSettings.PublicLobbyServerIp.GetValue();
 
-            if (ServerManagement.CurrentServer.IsRunning)
-                ServerManagement.CurrentServer.Stop();
-
-            if (CurrentClient.IsConnected)
-                CurrentClient.Disconnect();
-
-            if (PublicLobbyClient.IsConnected)
-                PublicLobbyClient.Disconnect();
+            ServerManagement.CurrentServer.Stop();
+            CurrentClient.Disconnect();
+            PublicLobbyClient.Disconnect();
 
             RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.Public);
-
             RiptideNetworkLayer.HostId = hostId;
 
             void OnConnect(object sender, EventArgs e)
@@ -224,7 +218,7 @@ namespace LabFusion.Riptide
 
                         if (hostDisconnected)
                         {
-                            NetworkHelper.Disconnect("Host Disconnected");
+                            NetworkHelper.Disconnect("Lobby Closed");
                         } else
                         {
                             // Make sure the user hasn't previously disconnected

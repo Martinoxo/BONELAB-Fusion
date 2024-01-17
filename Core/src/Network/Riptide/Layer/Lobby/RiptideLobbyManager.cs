@@ -28,7 +28,7 @@ namespace LabFusion.Riptide
 
             int lobbyCount = message.GetInt();
 #if DEBUG
-            FusionLogger.Log($"Got {lobbyCount} lobbies");
+            FusionLogger.Log($"Got {lobbyCount} lobbie(s)");
 #endif
             if (lobbyCount == 0)
             {

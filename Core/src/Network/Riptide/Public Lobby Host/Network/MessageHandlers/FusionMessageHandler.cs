@@ -16,5 +16,43 @@ namespace LobbyHost.MessageHandlers
         {
             return Message.Create(channel, messageId).AddBytes(data);
         }
+
+        internal static void HandleSendToServer(Message message, Connection client)
+        {
+            byte[] data = message.GetBytes();
+            ushort id = message.GetUShort();
+
+            var msg = CreateFusionMessage(data, message.SendMode);
+            msg.AddBool(true);
+            Core.Server.Send(msg, id);
+        }
+
+        internal static void HandleBroadcast(Message message, Connection connection)
+        {
+            byte[] data = message.GetBytes();
+            var lobby = Lobby.GetHostLobby(connection.Id);
+
+            if (lobby != null)
+            {
+                var msg = CreateFusionMessage(data, message.SendMode);
+                var clients = new List<Connection>(lobby.Clients);
+                foreach (var client in clients)
+                {
+                    Core.Server.Send(msg, client.Id, false);
+                }
+                msg.Release();
+            }
+        }
+
+        internal static void HandleSendFromServer(Message message, Connection client)
+        {
+            byte[] data = message.GetBytes();
+            ushort id = message.GetUShort();
+            bool isHost = message.GetBool();
+
+            var msg = CreateFusionMessage(data, message.SendMode);
+            msg.AddBool(isHost);
+            Core.Server.Send(msg, id);
+        }
     }
 }

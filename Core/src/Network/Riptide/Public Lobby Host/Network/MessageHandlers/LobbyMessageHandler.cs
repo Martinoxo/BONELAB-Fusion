@@ -20,13 +20,17 @@ namespace LobbyHost.MessageHandlers
                 Core.Server.Send(response, client.Id);
                 return;
             }
-            foreach (var lobby in Core.CurrentLobbies)
+
+            // Try to avoid modifying the list while it's being iterated through
+            var currentLobbies = new List<Lobby>(Core.CurrentLobbies);
+            foreach (var lobby in currentLobbies)
             {
                 var lobbyResponse = Message.Create(MessageSendMode.Reliable, (ushort)MessageTypes.RequestLobbies);
 
                 lobbyResponse.AddInt(Core.CurrentLobbies.Count);
 
                 lobbyResponse.AddUShort(lobby.HostId);
+
                 lobbyResponse.AddInt(lobby.Metadata.Count);
 
                 foreach (var metadata in lobby.Metadata)
@@ -52,7 +56,7 @@ namespace LobbyHost.MessageHandlers
                 msg.AddBool(true);
             } else
             {
-                TUIManager.RefreshUi("Failed to join lobby.");
+                TUIManager.RefreshUi($"Client with Id of {client.Id} failed to join lobby with Host Id {hostId} as it doesn't exist.");
             }
         }
 
@@ -81,8 +85,6 @@ namespace LobbyHost.MessageHandlers
 
             // Add metadata to the lobby
             lobby.Metadata.Add(new KeyValuePair<string, string>(key, value));
-
-            TUIManager.RefreshUi($"Obtained lobby key {key} with value {value}");
         }
     }
 }

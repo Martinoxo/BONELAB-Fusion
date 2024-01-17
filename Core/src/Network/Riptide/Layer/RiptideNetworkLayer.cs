@@ -89,7 +89,7 @@ namespace LabFusion.Riptide
             CurrentServer.ClientConnected += OnClientConnect;
             CurrentClient.Disconnected += OnDisconnectFromServer;
             CurrentClient.ConnectionFailed += OnConnectionFail;
-            PublicLobbyClient.Disconnected += OnDisconnectFromServer;
+            PublicLobbyClient.Disconnected += OnPublicDisconnectFromServer;
             PublicLobbyClient.ConnectionFailed += OnPublicConnectionFail;
 
             // Riptide Messages
@@ -102,6 +102,11 @@ namespace LabFusion.Riptide
             MultiplayerHooking.OnPlayerLeave += OnPlayerLeave;
             MultiplayerHooking.OnDisconnect += OnDisconnect;
             MultiplayerHooking.OnServerSettingsChanged += OnUpdateLobby;
+        }
+
+        private void OnPublicDisconnectFromServer(object sender, DisconnectedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void OnPublicConnectionFail(object sender, ConnectionFailedEventArgs e)
@@ -218,7 +223,7 @@ namespace LabFusion.Riptide
             var serverInfo = matchmaking.CreateCategory("Server Info", Color.white);
 
             // Server Starting/Settings
-            _createServerElement = serverInfo.CreateFunctionElement("Start Server", Color.green, () => OnClickStartServer(), "P2P Servers REQUIRE that you Port Forward in order to host!");
+            _createServerElement = serverInfo.CreateFunctionElement("Start Server", Color.green, () => OnClickStartServer());
             _serverTypeElement = serverInfo.CreateFunctionElement($"Server Type: \n{RiptidePreferences.LocalServerSettings.ServerType.GetValue()}", Color.cyan, () => OnUpdateServerType(RiptidePreferences.LocalServerSettings.ServerType.GetValue()));
             RiptidePreferences.LocalServerSettings.ServerType.OnValueChanged += (v) => _serverTypeElement.SetName($"Server Type: \n{v}");
             var p2pServerSettingsMenu = serverInfo.CreateCategory("P2P Server Settings", Color.cyan);
@@ -419,13 +424,20 @@ namespace LabFusion.Riptide
                     {
                         title = "Timed Out",
                         showTitleOnPopup = true,
-                        message = "Timed out when requesting lobbies. Is the Public Lobby Host running?",
+                        message = "Timed out when requesting lobbies. Is the Public Lobby Host running properly?",
                         isMenuItem = false,
                         isPopup = true,
                     });
                     _isPublicLobbySearching = false;
                     yield break;
                 }
+            }
+
+            if (!IsClient)
+            {
+                CurrentServer.Stop();
+                PublicLobbyClient.Disconnect();
+                CurrentClient.Disconnect();
             }
 
             var lobbies = task.Result;
@@ -621,7 +633,6 @@ namespace LabFusion.Riptide
             OnUpdateCreateServerText();
         }
 
-        private FieldInfo _fieldInfo = typeof(FunctionElement).GetField("_confirmer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         private void OnUpdateCreateServerText()
         {
             try
@@ -644,16 +655,6 @@ namespace LabFusion.Riptide
                     _createServerElement.SetName("Start Server");
                     _createServerElement.SetColor(Color.green);
                 }
-
-                if (RiptidePreferences.LocalServerSettings.ServerType.GetValue() == ServerTypes.P2P)
-                {
-                    if (!IsClient)
-                    {
-                        _fieldInfo.SetValue(_createServerElement, true);
-                    }
-                }
-                else
-                    _fieldInfo.SetValue(_createServerElement, false);
             } catch (Exception ex)
             {
                 FusionLogger.Error($"Failed to update Create Server text with reason: {ex.Message}");

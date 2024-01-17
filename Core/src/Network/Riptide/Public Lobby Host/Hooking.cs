@@ -23,7 +23,7 @@ namespace LobbyHost
 
         internal static void OnClientConnected(object? sender, ServerConnectedEventArgs e)
         {
-            e.Client.TimeoutTime = 20000;
+            e.Client.TimeoutTime = 15000;
             e.Client.CanQualityDisconnect = false;
         }
 
@@ -48,39 +48,17 @@ namespace LobbyHost
                     }
                 case MessageTypes.PublicSendToServer:
                     {
-                        byte[] data = e.Message.GetBytes();
-                        ushort id = e.Message.GetUShort();
-
-                        var msg = CreateFusionMessage(data, e.Message.SendMode);
-                        msg.AddBool(true);
-                        Core.Server.Send(msg, id);
+                        FusionMessageHandler.HandleSendToServer(e.Message, e.FromConnection);
                         break;
                     }
                 case MessageTypes.PublicSendFromServer:
                     {
-                        byte[] data = e.Message.GetBytes();
-                        ushort id = e.Message.GetUShort();
-                        bool isHost = e.Message.GetBool();
-
-                        var msg = CreateFusionMessage(data, e.Message.SendMode);
-                        msg.AddBool(isHost);
-                        Core.Server.Send(msg, id);
+                        FusionMessageHandler.HandleSendFromServer(e.Message, e.FromConnection);
                         break;
                     }
                 case MessageTypes.PublicBroadcast:
                     {
-                        byte[] data = e.Message.GetBytes();
-                        var lobby = Lobby.GetHostLobby(e.FromConnection.Id);
-                        
-                        var msg = CreateFusionMessage(data, e.Message.SendMode);
-                        if (lobby != null)
-                        {
-                            foreach (var client in lobby.Clients)
-                            {
-                                Core.Server.Send(msg, client.Id, false);
-                            }
-                            msg.Release();
-                        }
+                        FusionMessageHandler.HandleBroadcast(e.Message, e.FromConnection);
                         break;
                     }
                 case MessageTypes.JoinLobby:

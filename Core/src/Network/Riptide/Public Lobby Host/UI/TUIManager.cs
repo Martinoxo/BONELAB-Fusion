@@ -28,7 +28,16 @@ namespace LobbyHost.UI
                 $"{info}\n" +
                 $"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 
-            Console.WriteLine("Press any key to close.");
+            Console.WriteLine("Type \"close\" to exit, type \"help\" for a list of commands.");
+        }
+
+        internal static void RefreshCommandUi()
+        {
+            string input = Console.ReadLine();
+
+            Commands.HandleCommand(input);
+
+            RefreshCommandUi();
         }
     }
 }

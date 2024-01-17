@@ -52,33 +52,18 @@ namespace LobbyHost.Types
             }
         }
 
-        internal static Lobby GetHostLobby(ushort hostId)
+        internal static Lobby? GetHostLobby(ushort hostId)
         {
-            foreach (var lobby in Core.CurrentLobbies)
-            {
-                if (lobby.HostId == hostId)
-                {
-                    return lobby;
-                }
-            }
+            var lobby = Core.CurrentLobbies.FirstOrDefault(lobby => lobby.HostId == hostId);
 
-            return null;
+            return lobby;
         }
 
-        internal static Lobby GetLobby(ushort clientId)
+        internal static Lobby? GetLobby(ushort clientId)
         {
-            foreach (var lobby in Core.CurrentLobbies)
-            {
-                foreach (var client in lobby.Clients)
-                {
-                    if (client.Id == clientId)
-                    {
-                        return lobby;
-                    }
-                }
-            }
+            var lobby = Core.CurrentLobbies.FirstOrDefault(lobby => lobby.Clients.Any(client => client.Id == clientId));
 
-            return null;
+            return lobby;
         }
     }
 }

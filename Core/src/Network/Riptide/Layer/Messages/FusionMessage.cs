@@ -37,9 +37,6 @@ namespace LabFusion.Riptide.Messages
                     }
                 case ServerTypes.Public:
                     {
-                        if (!InternalLayerHelpers.CurrentNetworkLayer.IsClient)
-                            return;
-
                         var bytes = message.GetBytes();
                         var isHost = message.GetBool();
                         FusionMessageHandler.ReadMessage(bytes, isHost);

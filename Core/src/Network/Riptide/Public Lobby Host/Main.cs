@@ -9,14 +9,13 @@ namespace LobbyHost
 {
     internal class Core
     {
-        internal static Server Server;
+        internal static Server Server = new();
         internal static List<Lobby> CurrentLobbies = new();
 
         static void Main(string[] args)
         {
             Console.Title = "BONELAB Lobby Host";
 
-            Server = new Server();
             Server.ClientConnected += Hooking.OnClientConnected;
             Server.ClientDisconnected += Hooking.OnClientDisconnected;
             Server.MessageReceived += Hooking.OnMessageReceived;
@@ -32,7 +31,7 @@ namespace LobbyHost
 #endif
 
             TUIManager.RefreshUi();
-            Console.ReadKey();
+            TUIManager.RefreshCommandUi();
         }
 
         private static void RiptideTick(object? sender, ElapsedEventArgs e)
