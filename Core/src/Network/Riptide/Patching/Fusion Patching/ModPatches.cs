@@ -17,24 +17,6 @@ namespace LabFusion.Riptide.Patching
     public static class ModPatches
     {
         /// <summary>
-        /// Removes Fusion's Auto-Updater warning on PC.
-        /// </summary>
-        /// <returns></returns>
-        [HarmonyPrefix]
-        [HarmonyPatch(nameof(FusionMod.OnLateInitializeMelon))]
-        public static bool ModifyLateInitializeMelon()
-        {
-            ManualPatcher.PatchAll();
-            InternalLayerHelpers.OnLateInitializeLayer();
-            PersistentAssetCreator.OnLateInitializeMelon();
-            PlayerAdditionsHelper.OnInitializeMelon();
-
-            FusionPreferences.OnCreateBoneMenu();
-
-            return false;
-        }
-
-        /// <summary>
         /// Loads RiptideNetworking and netstandard when Fusion is initialized.
         /// </summary>
         [HarmonyPrefix]

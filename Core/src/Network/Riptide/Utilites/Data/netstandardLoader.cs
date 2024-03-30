@@ -13,12 +13,12 @@ namespace LabFusion.Riptide.Utilities
     {
         internal static void Load()
         {
-            FusionLogger.Log("Loading netstandard");
+            //FusionLogger.Log("Loading netstandard");
 
-            string sdkPath = PersistentData.GetPath($"netstandard.dll");
-            File.WriteAllBytes(sdkPath, EmbeddedResource.LoadFromAssembly(FusionMod.FusionAssembly, LabFusion.Riptide.Utilities.ResourcePaths.netstandardPath));
+            //string sdkPath = PersistentData.GetPath($"netstandard.dll");
+            //File.WriteAllBytes(sdkPath, EmbeddedResource.LoadFromAssembly(FusionMod.FusionAssembly, LabFusion.Riptide.Utilities.ResourcePaths.netstandardPath));
 
-            MelonLoader.MelonAssembly.LoadMelonAssembly(sdkPath);
+            //MelonLoader.MelonAssembly.LoadMelonAssembly(sdkPath);
         }
     }
 }

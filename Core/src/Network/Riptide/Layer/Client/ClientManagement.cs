@@ -88,7 +88,8 @@ namespace LabFusion.Riptide
             }
 
             if (!code.Contains("."))
-                code = IPExtensions.DecodeIpAddress(codeInt);
+                code = "127.0.0.1";
+                //code = IPExtensions.DecodeIpAddress(codeInt);
 
             void OnConnect(object sender, EventArgs e)
             {

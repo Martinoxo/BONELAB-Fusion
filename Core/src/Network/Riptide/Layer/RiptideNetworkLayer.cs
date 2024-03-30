@@ -488,16 +488,6 @@ namespace LabFusion.Riptide
 
         private void OnDislayServerCode()
         {
-            FusionNotifier.Send(new FusionNotification()
-            {
-                isMenuItem = false,
-                isPopup = true,
-                showTitleOnPopup = true,
-                popupLength = 20f,
-                title = "Server Code",
-                message = $"{IPExtensions.EncodeIpAddress(PlayerInfo.PlayerIpAddress)}",
-                type = NotificationType.INFORMATION,
-            });
         }
 
         private void OnClickStartServer()

@@ -3,6 +3,7 @@
 using LabFusion.Data;
 using LabFusion.Debugging;
 using LabFusion.Preferences;
+using LabFusion.Riptide;
 using LabFusion.Utilities;
 using Steamworks;
 
@@ -22,6 +23,8 @@ namespace LabFusion.Network
 
         public static NetworkLayer GetDefaultLayer()
         {
+            return NetworkLayer.GetLayer<RiptideNetworkLayer>();
+
             if (HelperMethods.IsAndroid())
                 return NetworkLayer.GetLayer<ProxySteamVRNetworkLayer>();
 

@@ -486,7 +486,6 @@
     <Compile Include="Core\src\Network\Riptide\Utilites\Data\TideContentLoader.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\MessageTypes.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\Enums\ServerTypes.cs" />
-    <Compile Include="Core\src\Network\Riptide\Utilites\Internal\IPExtensions.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\PlayerInfo.cs" />
     <Compile Include="Core\src\Network\Riptide\Utilites\PublicLobbyUtils.cs" />
     <Compile Include="Core\src\Network\Steam\SpacewarNetworkLayer.cs" />
@@ -1475,7 +1474,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Core\src\Network\Riptide\resources\lib\netstandard.dll" />
     <EmbeddedResource Include="Core\src\Network\Riptide\resources\lib\RiptideNetworking.dll" />
     <EmbeddedResource Include="Core\resources\text\raw_changelog.txt" />
     <EmbeddedResource Include="Core\resources\text\credits\raw_credits_01.txt" />
@@ -1505,7 +1503,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "E:\R2ModManData\BONELAB\profiles\TideFusion Flatscreen\Mods\$(TargetFileName)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

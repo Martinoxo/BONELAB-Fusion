@@ -22,30 +22,6 @@ namespace LabFusion.Data
             // If it's already loaded, don't load it again
             if (HasSteamAPI)
                 return;
-
-            // Don't extract this for android
-            if (HelperMethods.IsAndroid())
-            {
-                HasSteamAPI = false;
-                return;
-            }
-
-            // Extracts steam api 64 and loads it into the game
-            string sdkPath = PersistentData.GetPath($"steam_api64.dll");
-            File.WriteAllBytes(sdkPath, EmbeddedResource.LoadFromAssembly(FusionMod.FusionAssembly, ResourcePaths.SteamAPIPath));
-
-            _libraryPtr = DllTools.LoadLibrary(sdkPath);
-
-            if (_libraryPtr != IntPtr.Zero)
-            {
-                FusionLogger.Log("Successfully loaded steam_api64.dll into the application!");
-                HasSteamAPI = true;
-            }
-            else
-            {
-                uint errorCode = DllTools.GetLastError();
-                FusionLogger.Error($"Failed to load steam_api64.dll into the application.\nError Code: {errorCode}");
-            }
         }
 
         public static void OnFreeSteamAPI()

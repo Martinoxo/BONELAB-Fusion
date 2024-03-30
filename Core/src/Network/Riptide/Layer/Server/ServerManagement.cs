@@ -17,6 +17,7 @@ using LabFusion.Utilities;
 using LabFusion.Riptide.Messages;
 using static LabFusion.Riptide.ClientManagement;
 using System.Net;
+using LabFusion.Data;
 
 namespace LabFusion.Riptide
 {
@@ -45,10 +46,25 @@ namespace LabFusion.Riptide
 
             CurrentServer.Start(RiptidePreferences.LocalServerSettings.ServerPort.GetValue(), 256, 0, false);
 
-            CurrentClient.Connected += OnConnectToP2PServer;
-            CurrentClient.Connect(
-                $"127.0.0.1:{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}", 5, 0, null, false);
-        }
+			//CurrentClient.Connected += OnConnectToP2PServer;
+			//CurrentClient.Connect(
+			//    $"127.0.0.1:{RiptidePreferences.LocalServerSettings.ServerPort.GetValue()}", 5, 0, null, false);
+
+			RiptidePreferences.LocalServerSettings.ServerType.SetValue(ServerTypes.P2P);
+			PlayerIdManager.SetLongId(0);
+			InternalServerHelpers.OnStartServer();
+			InternalLayerHelpers.OnUpdateLobby();
+
+			FusionNotifier.Send(new FusionNotification()
+			{
+				showTitleOnPopup = false,
+				message = $"Hacky wacky client to server",
+				isMenuItem = false,
+				isPopup = true,
+				popupLength = 4f,
+				type = NotificationType.INFORMATION
+			});
+		}
 
         private static void OnConnectToP2PServer(object sender, EventArgs e)
         {
@@ -66,12 +82,33 @@ namespace LabFusion.Riptide
             InternalServerHelpers.OnStartServer();
 
             InternalLayerHelpers.OnUpdateLobby();
-        }
+
+			FusionNotifier.Send(new FusionNotification()
+			{
+				showTitleOnPopup = false,
+				message = $"OnConnectToP2PServer",
+				isMenuItem = false,
+				isPopup = true,
+				popupLength = 4f,
+				type = NotificationType.INFORMATION
+			});
+			return;
+		}
 
         // Hooks
         public static void OnClientDisconnect(object sender, ServerDisconnectedEventArgs e)
         {
-            var id = e.Client.Id;
+			FusionNotifier.Send(new FusionNotification()
+			{
+				showTitleOnPopup = false,
+				message = $"OnClientDisconnect",
+				isMenuItem = false,
+				isPopup = true,
+				popupLength = 4f,
+				type = NotificationType.INFORMATION
+			});
+
+			var id = e.Client.Id;
             // Make sure the user hasn't previously disconnected
             if (PlayerIdManager.HasPlayerId(id))
             {
@@ -83,11 +120,32 @@ namespace LabFusion.Riptide
             }
         }
 
-        public static void OnClientConnect(object obj, ServerConnectedEventArgs args)
+        public static void OnClientConnect(object sender, ServerConnectedEventArgs e)
         {
-            args.Client.CanQualityDisconnect = false;
-            args.Client.TimeoutTime = 15000;
-        }
+			FusionNotifier.Send(new FusionNotification()
+			{
+				showTitleOnPopup = false,
+				message = $"OnClientConnect",
+				isMenuItem = false,
+				isPopup = true,
+				popupLength = 4f,
+				type = NotificationType.INFORMATION
+			});
+
+			e.Client.CanQualityDisconnect = false;
+            e.Client.TimeoutTime = 15000;
+
+		    ushort id = e.Client.Id;
+			if (!PlayerIdManager.HasPlayerId(id))
+			{
+                PlayerId playerId = PlayerIdManager.GetPlayerId(e.Client.Id);
+
+                SerializedAvatarStats stats = new SerializedAvatarStats();
+
+				InternalServerHelpers.OnUserJoin(playerId,false);
+                ConnectionSender.SendPlayerJoin(playerId,CommonBarcodes.STRONG_BARCODE,stats);
+			}
+		}
 
         public static void CreatePublicLobby()
         {
@@ -161,7 +219,7 @@ namespace LabFusion.Riptide
         /// <param name="args"></param>
         public static void OnMessageReceived(object obj, MessageReceivedEventArgs args)
         {
-            switch (args.MessageId)
+			switch (args.MessageId)
             {
                 case MessageTypes.FusionMessage:
                     {

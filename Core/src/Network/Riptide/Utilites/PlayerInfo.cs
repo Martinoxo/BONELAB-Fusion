@@ -27,28 +27,8 @@ namespace LabFusion.Riptide.Utilities
         /// </summary>
         public static void InitializeUsername()
         {
-            if (!HelperMethods.IsAndroid())
-            {
-                if (Path.GetFileName(UnityEngine.Application.dataPath) == "BONELAB_Steam_Windows64_Data")
-                {
-                    if (!SteamClient.IsValid)
-                    {
-                        SteamClient.Init(250820u, asyncCallbacks: false);
-                    }
-                    PlayerIdManager.SetUsername(SteamClient.Name);
-                    SteamClient.Shutdown();
-                }
-                else
-                {
-                    Oculus.Platform.Core.Initialize("5088709007839657");
-                    Users.GetLoggedInUser().OnComplete((Message<User>.Callback)GetLoggedInUserCallback);
-                }
-            }
-            else
-            {
-                Oculus.Platform.Core.Initialize("4215734068529064");
-                Users.GetLoggedInUser().OnComplete((Message<User>.Callback)GetLoggedInUserCallback);
-            }
+            PlayerIdManager.SetUsername(UnityEngine.Random.RandomRangeInt(0,1000000).ToString());
+            return;
         }
 
         private static void GetLoggedInUserCallback(Message<User> msg)
@@ -71,6 +51,9 @@ namespace LabFusion.Riptide.Utilities
         /// </summary>
         internal static void InitializePlayerIPAddress()
         {
+            PlayerIpAddress = "localhost";
+            return;
+
             string ip = "";
             try
             {
