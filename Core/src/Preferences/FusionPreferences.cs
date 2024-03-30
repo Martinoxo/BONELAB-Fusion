@@ -207,7 +207,7 @@ namespace LabFusion.Preferences
         internal static void OnPrepareBoneMenuCategory()
         {
             // We create this here so that its one of the first categories
-            fusionCategory = MenuManager.CreateCategory("BONELAB Fusion", Color.white);
+            fusionCategory = MenuManager.CreateCategory("BONELAB Wide", Color.white);
         }
 
         private static int _lastIndex;
